@@ -15,6 +15,9 @@
 *.iws
 .idea/
 
+# ? 
+/.dart_tool
+
 # Visual Studio Code related
 .vscode/
 
