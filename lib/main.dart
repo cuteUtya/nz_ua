@@ -1,35 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
+import 'package:nz_ua/theme.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ClientTheme.init();
+  runApp(
+    MaterialApp(
+      title: 'Flutter Demo',
+      home: ColoredBox(
+        color: NTheme.field('base.back'),
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Main(),
+    return NzApi(
+      onLoad: (api) {
+        api.login('name', 'pass');
+      },
     );
-  }
-}
-
-class Main extends StatelessWidget {
-  static WebViewController? _controller;
-  static NzApi? _api;
-  @override
-  Widget build(BuildContext context) {
-    return NzApi(onLoad: (api) {
-      print('login call');
-      api.login('name', 'pass');
-    });
   }
 }
