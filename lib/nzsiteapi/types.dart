@@ -1,3 +1,7 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'types.g.dart';
+
 abstract class ElementIdentifier {
   String getValue();
 }
@@ -51,7 +55,7 @@ class NewsPageState implements NzState {
     required this.meta,
   });
   final TabSet tabs;
-  final News news;
+  final NewsArr news;
   final SideMetadata meta;
 }
 
@@ -75,6 +79,7 @@ class DiaryMarkGrid extends NzState {
   final List<DiaryMarkGridLine> lines;
 }
 
+@JsonSerializable()
 class DiaryMarkGridLine {
   DiaryMarkGridLine({
     required this.index,
@@ -84,6 +89,10 @@ class DiaryMarkGridLine {
   final int index;
   final String lessonName;
   final List<String> marks;
+
+  factory DiaryMarkGridLine.fromJson(Map<String, dynamic> json) =>
+      _$DiaryMarkGridLineFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryMarkGridLineToJson(this);
 }
 
 class SchedulePageState implements NzState {
@@ -106,6 +115,7 @@ class SecurityPageState implements NzState {
   final String? phone;
 }
 
+@JsonSerializable()
 class EmailStatus {
   EmailStatus({
     required this.email,
@@ -113,8 +123,13 @@ class EmailStatus {
   });
   final String email;
   final bool confirmed;
+
+  factory EmailStatus.fromJson(Map<String, dynamic> json) =>
+      _$EmailStatusFromJson(json);
+  Map<String, dynamic> toJson() => _$EmailStatusToJson(this);
 }
 
+@JsonSerializable()
 class ScheduleDay {
   ScheduleDay({
     required this.today,
@@ -124,8 +139,13 @@ class ScheduleDay {
   final bool today;
   final String date;
   final List<ScheduleLesson> lessons;
+
+  factory ScheduleDay.fromJson(Map<String, dynamic> json) =>
+      _$ScheduleDayFromJson(json);
+  Map<String, dynamic> toJson() => _$ScheduleDayToJson(this);
 }
 
+@JsonSerializable()
 class ScheduleLesson {
   ScheduleLesson({
     required this.name,
@@ -135,10 +155,15 @@ class ScheduleLesson {
   final String name;
   final UserProfileLink teacher;
   final String classAudience;
+
+  factory ScheduleLesson.fromJson(Map<String, dynamic> json) =>
+      _$ScheduleLessonFromJson(json);
+  Map<String, dynamic> toJson() => _$ScheduleLessonToJson(this);
 }
 
 abstract class DiaryContent {}
 
+@JsonSerializable()
 class DiaryContentTable implements DiaryContent {
   DiaryContentTable({
     required this.date,
@@ -146,8 +171,13 @@ class DiaryContentTable implements DiaryContent {
   });
   final DateTimeInterval date;
   final DiaryTable table;
+
+  factory DiaryContentTable.fromJson(Map<String, dynamic> json) =>
+      _$DiaryContentTableFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryContentTableToJson(this);
 }
 
+@JsonSerializable()
 class DiaryTable {
   DiaryTable({
     required this.dateValues,
@@ -155,8 +185,13 @@ class DiaryTable {
   });
   final List<String> dateValues;
   final List<DiaryTableLessonLine> lessonsMarks;
+
+  factory DiaryTable.fromJson(Map<String, dynamic> json) =>
+      _$DiaryTableFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryTableToJson(this);
 }
 
+@JsonSerializable()
 class DiaryTableLessonLine {
   DiaryTableLessonLine({
     required this.lessonName,
@@ -164,23 +199,39 @@ class DiaryTableLessonLine {
   });
   final String lessonName;
   final List<List<Mark>?> marks;
+
+  factory DiaryTableLessonLine.fromJson(Map<String, dynamic> json) =>
+      _$DiaryTableLessonLineFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryTableLessonLineToJson(this);
 }
 
+@JsonSerializable()
 class Mark {
   Mark({
     required this.value,
-    required this.theme,
+    required this.lesson,
+    this.theme,
   });
   final int value;
   /**theme? тематична/контрольна/поточна/... */
-  final String theme;
+  final String? theme;
+  final String lesson;
+
+  factory Mark.fromJson(Map<String, dynamic> json) => _$MarkFromJson(json);
+  Map<String, dynamic> toJson() => _$MarkToJson(this);
 }
 
+@JsonSerializable()
 class DiaryContentTopToDown implements DiaryContent {
   DiaryContentTopToDown({required this.content});
   final List<DiaryDayTopToDown> content;
+
+  factory DiaryContentTopToDown.fromJson(Map<String, dynamic> json) =>
+      _$DiaryContentTopToDownFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryContentTopToDownToJson(this);
 }
 
+@JsonSerializable()
 class DiaryDayTopToDown {
   DiaryDayTopToDown({
     required this.dayDate,
@@ -188,8 +239,13 @@ class DiaryDayTopToDown {
   });
   final String dayDate;
   final List<DiaryLine> lines;
+
+  factory DiaryDayTopToDown.fromJson(Map<String, dynamic> json) =>
+      _$DiaryDayTopToDownFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryDayTopToDownToJson(this);
 }
 
+@JsonSerializable()
 class DiaryLine {
   DiaryLine({
     required this.index,
@@ -200,8 +256,13 @@ class DiaryLine {
 
   final DateTimeInterval lessonTime;
   final DiaryLineContent? content;
+
+  factory DiaryLine.fromJson(Map<String, dynamic> json) =>
+      _$DiaryLineFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryLineToJson(this);
 }
 
+@JsonSerializable()
 class DiaryLineContent {
   DiaryLineContent({
     required this.name,
@@ -218,8 +279,13 @@ class DiaryLineContent {
   final String? mark;
   /**Поточна/лабараторна/контрольна - те, що і Mark.theme*/
   final String workType;
+
+  factory DiaryLineContent.fromJson(Map<String, dynamic> json) =>
+      _$DiaryLineContentFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryLineContentToJson(this);
 }
 
+@JsonSerializable()
 class SideMetadata {
   SideMetadata({
     required this.comingHomework,
@@ -229,19 +295,28 @@ class SideMetadata {
   });
   final List<Homework> comingHomework;
   final List<Mark> latestMarks;
-  final List<Birthdays> closestBirthdays;
+  final List<Birthday> closestBirthdays;
   final UserProfileLink me;
+
+  factory SideMetadata.fromJson(Map<String, dynamic> json) =>
+      _$SideMetadataFromJson(json);
+  Map<String, dynamic> toJson() => _$SideMetadataToJson(this);
 }
 
+@JsonSerializable()
 class TabSet {
   TabSet({
     required this.tabs,
     required this.activeTab,
   });
   final List<Tab> tabs;
-  final int activeTab;
+  final String activeTab;
+
+  factory TabSet.fromJson(Map<String, dynamic> json) => _$TabSetFromJson(json);
+  Map<String, dynamic> toJson() => _$TabSetToJson(this);
 }
 
+@JsonSerializable()
 class Tab {
   Tab({
     required this.link,
@@ -249,30 +324,37 @@ class Tab {
   });
   final String link;
   final String name;
+
+  factory Tab.fromJson(Map<String, dynamic> json) => _$TabFromJson(json);
+  Map<String, dynamic> toJson() => _$TabToJson(this);
 }
 
-abstract class News {}
+@JsonSerializable()
+class NewsArr {
+  NewsArr({required this.news});
+  final List<News> news;
 
-class MyNews implements News {
-  MyNews({
-    required this.author,
+  factory NewsArr.fromJson(Map<String, dynamic> json) => _$NewsArrFromJson(json);
+  Map<String, dynamic> toJson() => _$NewsArrToJson(this);
+}
+
+@JsonSerializable()
+class News {
+  News ({
+    this.author,
     required this.newsTime,
     required this.news,
   });
-  final NewsAuthor author;
+  final NewsAuthor? author;
   final String newsTime;
   final String news;
+
+
+  factory News.fromJson(Map<String, dynamic> json) => _$NewsFromJson(json);
+  Map<String, dynamic> toJson() => _$NewsToJson(this);
 }
 
-class ProjectNews implements News {
-  ProjectNews({
-    required this.newsTime,
-    required this.content,
-  });
-  final String newsTime;
-  final NewsContent content;
-}
-
+@JsonSerializable()
 class NewsContent {
   NewsContent({
     required this.title,
@@ -280,8 +362,13 @@ class NewsContent {
   });
   final String title;
   final List<TextEntity> textEntityes;
+
+  factory NewsContent.fromJson(Map<String, dynamic> json) =>
+      _$NewsContentFromJson(json);
+  Map<String, dynamic> toJson() => _$NewsContentToJson(this);
 }
 
+@JsonSerializable()
 class TextEntity {
   TextEntity({
     required this.text,
@@ -289,21 +376,25 @@ class TextEntity {
   });
   final String text;
   final List<TextEntityType> entityes;
+
+  factory TextEntity.fromJson(Map<String, dynamic> json) =>
+      _$TextEntityFromJson(json);
+  Map<String, dynamic> toJson() => _$TextEntityToJson(this);
 }
 
-abstract class TextEntityType {}
+@JsonSerializable()
+class TextEntityType {
+  TextEntityType({required this.type, this.hyperlink, this.imageUrl});
+  final String type;
+  final String? imageUrl;
+  final String? hyperlink;
 
-class TextEntityBold implements TextEntityType {}
-
-class TextEntityHyperink implements TextEntityType {}
-
-class TextEntityImage implements TextEntityType {
-  TextEntityImage({
-    required this.imageUrl,
-  });
-  final String imageUrl;
+  factory TextEntityType.fromJson(Map<String, dynamic> json) =>
+      _$TextEntityTypeFromJson(json);
+  Map<String, dynamic> toJson() => _$TextEntityTypeToJson(this);
 }
 
+@JsonSerializable()
 class NewsAuthor {
   NewsAuthor({
     required this.fullName,
@@ -313,27 +404,57 @@ class NewsAuthor {
   final String fullName;
   final String profilePhotoUrl;
   final String profileUrl;
+
+  factory NewsAuthor.fromJson(Map<String, dynamic> json) =>
+      _$NewsAuthorFromJson(json);
+  Map<String, dynamic> toJson() => _$NewsAuthorToJson(this);
 }
 
+@JsonSerializable()
 class Semester {
   Semester({required this.id, required this.name});
   final String name;
   final String id;
+
+  factory Semester.fromJson(Map<String, dynamic> json) =>
+      _$SemesterFromJson(json);
+  Map<String, dynamic> toJson() => _$SemesterToJson(this);
 }
 
-class Birthdays {
-  Birthdays({required this.date, required this.fullName});
-  final String fullName;
+@JsonSerializable()
+class Birthday {
+  Birthday({required this.date, required this.user});
+  final UserProfileLink user;
   final String date;
+
+  factory Birthday.fromJson(Map<String, dynamic> json) =>
+      _$BirthdayFromJson(json);
+  Map<String, dynamic> toJson() => _$BirthdayToJson(this);
 }
 
+@JsonSerializable()
 class Homework {
-  Homework({required this.exercise, required this.lesson, required this.date});
+  Homework({required this.exercises, required this.date});
   final String date;
+  final List<Exercise> exercises;
+
+  factory Homework.fromJson(Map<String, dynamic> json) =>
+      _$HomeworkFromJson(json);
+  Map<String, dynamic> toJson() => _$HomeworkToJson(this);
+}
+
+@JsonSerializable()
+class Exercise {
+  Exercise({required this.exercise, required this.lesson});
   final String lesson;
   final String exercise;
+
+  factory Exercise.fromJson(Map<String, dynamic> json) =>
+      _$ExerciseFromJson(json);
+  Map<String, dynamic> toJson() => _$ExerciseToJson(this);
 }
 
+@JsonSerializable()
 class UserProfile {
   UserProfile({
     required this.fullName,
@@ -345,8 +466,13 @@ class UserProfile {
   final String birthDate;
   final String photoProfileUrl;
   final List<String> parents;
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileFromJson(json);
+  Map<String, dynamic> toJson() => _$UserProfileToJson(this);
 }
 
+@JsonSerializable()
 class UserProfileLink {
   UserProfileLink({
     required this.fullName,
@@ -354,14 +480,24 @@ class UserProfileLink {
   });
   final String fullName;
   final String profileUrl;
+
+  factory UserProfileLink.fromJson(Map<String, dynamic> json) =>
+      _$UserProfileLinkFromJson(json);
+  Map<String, dynamic> toJson() => _$UserProfileLinkToJson(this);
 }
 
+@JsonSerializable()
 class DateTimeInterval {
   DateTimeInterval({required this.from, required this.to});
   final String from;
   final String to;
+
+  factory DateTimeInterval.fromJson(Map<String, dynamic> json) =>
+      _$DateTimeIntervalFromJson(json);
+  Map<String, dynamic> toJson() => _$DateTimeIntervalToJson(this);
 }
 
+@JsonSerializable()
 class Parent {
   Parent({
     required this.fullName,
@@ -369,6 +505,9 @@ class Parent {
   });
   final String fullName;
   final ParentRole role;
+
+  factory Parent.fromJson(Map<String, dynamic> json) => _$ParentFromJson(json);
+  Map<String, dynamic> toJson() => _$ParentToJson(this);
 }
 
 enum ParentRole {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
@@ -13,28 +15,41 @@ class NzApi extends StatelessWidget {
   NzState? currState;
   final BehaviorSubject<NzState> _state = BehaviorSubject();
   Stream<NzState> get state => _state.stream;
+  late BuildContext _context;
 
   bool _inited = false;
+  bool _loaded = false;
 
   @override
   build(BuildContext context) {
-    return Visibility(
-      visible: true,
-      child: WebViewPlus(
-        initialUrl: '$baseUrl/login',
-        onPageFinished: (c) {
-          _onUrlChange(c);
-          if(!_inited) {
-            _inited = true;
-            onLoad(this);
-          }
-        },
-        onWebViewCreated: (c) async {
-          print('onWebViewCreated ${c.webViewController}');
-          _controller = c.webViewController;
-          print(_controller);
-        },
-        javascriptMode: JavascriptMode.unrestricted,
+    _context = context;
+    return Opacity(
+      opacity: 1,
+      child: Visibility(
+        visible: true,
+        child: WebViewPlus(
+          initialUrl: '$baseUrl/menu',
+          onPageFinished: (c) {
+            _onUrlChange(c);
+
+            if (!_inited && _controller != null) {
+              _inited = true;
+              _loaded = true;
+              onLoad(this);
+            }
+          },
+          onWebViewCreated: (c) {
+            _controller = c.webViewController;
+            print(_controller);
+            if (!_inited && !_loaded) {
+              _inited = true;
+              _loaded = true;
+              onLoad(this);
+            }
+          },
+          onProgress: (progress) {},
+          javascriptMode: JavascriptMode.unrestricted,
+        ),
       ),
     );
   }
@@ -50,26 +65,54 @@ class NzApi extends StatelessWidget {
     currState = state;
   }
 
-  void _onUrlChange(String url) {
+  Future<SideMetadata> _getMetadata() async {
+    var j = json.decode(await _executeScript('getMetadata.js'));
+    return SideMetadata.fromJson(
+        json.decode(await _executeScript('getMetadata.js')));
+  }
+
+  void _onUrlChange(String url) async {
     var path = url.substring(baseUrl.length, url.length);
     print(path);
     switch (path) {
       case '/login':
         _changeState(NeedLoginState());
-        print('login');
+        break;
+      case '/menu':
+        //we already login
+        _changeState(MainPageState());
+        break;
+      case '/account/forgot-password':
+        _changeState(NeedEmailState());
+        break;
+      case '/dashboard/news':
+        var tabs =
+            TabSet.fromJson(json.decode(await _executeScript('getTabs.js')));
+        var news = NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
+        var meta = await _getMetadata();
+        _changeState(NewsPageState(
+            tabs: tabs,
+            news: news,
+            meta: meta));
         break;
     }
+  }
+
+  Future<String> _executeScript(String script) async {
+    var str = await DefaultAssetBundle.of(_context)
+        .loadString('Assets/scripts/$script');
+    return (await _controller!.runJavascriptReturningResult(str)).toString();
   }
 
   bool _currentStateIs(Type type) {
     return currState?.runtimeType == type;
   }
 
-  void login(String name, String password) async {
+  Future<void> login(String name, String password) async {
     if (!_currentStateIs(NeedLoginState)) return;
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
-    //await clickButton(ClassName('ms-button form-submit-btn'));
+    await clickButton(ClassName('ms-button form-submit-btn'));
   }
 
   void toggleCheckBox(ElementIdentifier identifier, bool value) async {
@@ -78,7 +121,12 @@ class NzApi extends StatelessWidget {
     );
   }
 
-  Future<void> setValue(ElementIdentifier identifier, String value, {String valueName = "value", bool valueIsString = true}) async {
+  Future<void> goto(String path) async {
+    await _controller!.loadUrl(NzApi.baseUrl + path);
+  }
+
+  Future<void> setValue(ElementIdentifier identifier, String value,
+      {String valueName = "value", bool valueIsString = true}) async {
     var c = valueIsString ? "\"" : '';
     var js = "${_getObjectCall(identifier)}.$valueName = $c$value$c";
     await _controller!.runJavascript(js);

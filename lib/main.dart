@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
+import 'package:nz_ua/nzsiteapi/types.dart';
 import 'package:nz_ua/theme.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
@@ -22,10 +23,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NzApi(
-      onLoad: (api) {
-        api.login('name', 'pass');
-      },
+    NzApi nzapi = NzApi(
+      onLoad: (api) {},
+    );
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        nzapi,
+        MaterialButton(
+          onPressed: () async {
+            await nzapi.goto('/dashboard/news');
+          },
+          color: Colors.blue,
+        ),
+      ],
     );
   }
 }
