@@ -345,16 +345,31 @@ Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
     };
 
 UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => UserProfile(
+      isTeacher: json['isTeacher'] as bool,
       fullName: json['fullName'] as String,
+      subjects: (json['subjects'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      classes:
+          (json['classes'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      formMasterOf: json['formMasterOf'] as String?,
+      currentClass: json['currentClass'] as String?,
       birthDate: json['birthDate'] as String,
       photoProfileUrl: json['photoProfileUrl'] as String,
       parents:
-          (json['parents'] as List<dynamic>).map((e) => e as String).toList(),
+          (json['parents'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      schoolName: json['schoolName'] as String,
     );
 
 Map<String, dynamic> _$UserProfileToJson(UserProfile instance) =>
     <String, dynamic>{
+      'isTeacher': instance.isTeacher,
       'fullName': instance.fullName,
+      'classes': instance.classes,
+      'formMasterOf': instance.formMasterOf,
+      'subjects': instance.subjects,
+      'schoolName': instance.schoolName,
+      'currentClass': instance.currentClass,
       'birthDate': instance.birthDate,
       'photoProfileUrl': instance.photoProfileUrl,
       'parents': instance.parents,
@@ -398,3 +413,99 @@ const _$ParentRoleEnumMap = {
   ParentRole.mother: 'mother',
   ParentRole.father: 'father',
 };
+
+ApiLoginResponse _$ApiLoginResponseFromJson(Map<String, dynamic> json) =>
+    ApiLoginResponse(
+      access_token: json['access_token'] as String,
+      refresh_token: json['refresh_token'] as String,
+      email_hash: json['email_hash'] as String,
+      student_id: json['student_id'] as int,
+      avatar: AvatarResponse.fromJson(json['avatar'] as Map<String, dynamic>),
+      error_message: json['error_message'] as String,
+      FIO: json['FIO'] as String,
+      permissions: PermissionsResponse.fromJson(
+          json['permissions'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$ApiLoginResponseToJson(ApiLoginResponse instance) =>
+    <String, dynamic>{
+      'access_token': instance.access_token,
+      'refresh_token': instance.refresh_token,
+      'email_hash': instance.email_hash,
+      'student_id': instance.student_id,
+      'FIO': instance.FIO,
+      'avatar': instance.avatar,
+      'permissions': instance.permissions,
+      'error_message': instance.error_message,
+    };
+
+PermissionsResponse _$PermissionsResponseFromJson(Map<String, dynamic> json) =>
+    PermissionsResponse(
+      isuo_nzportal_children: (json['isuo_nzportal_children'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$PermissionsResponseToJson(
+        PermissionsResponse instance) =>
+    <String, dynamic>{
+      'isuo_nzportal_children': instance.isuo_nzportal_children,
+    };
+
+AvatarResponse _$AvatarResponseFromJson(Map<String, dynamic> json) =>
+    AvatarResponse(
+      image_url: json['image_url'] as String?,
+      datetime: json['datetime'] as String?,
+    );
+
+Map<String, dynamic> _$AvatarResponseToJson(AvatarResponse instance) =>
+    <String, dynamic>{
+      'image_url': instance.image_url,
+      'datetime': instance.datetime,
+    };
+
+ApiUserGetResponse _$ApiUserGetResponseFromJson(Map<String, dynamic> json) =>
+    ApiUserGetResponse(
+      id: json['id'] as int?,
+      first_name: json['first_name'] as String?,
+      last_name: json['last_name'] as String?,
+      email_address: json['email_address'] as String?,
+      username: json['username'] as String?,
+      algorithm: json['algorithm'] as String?,
+      salt: json['salt'] as String?,
+      password: json['password'] as String?,
+      is_active: json['is_active'] as int?,
+      is_super_admin: json['is_super_admin'] as int?,
+      last_login: json['last_login'] as String?,
+      created_at: json['created_at'] as String?,
+      updated_at: json['updated_at'] as String?,
+      patronymic: json['patronymic'] as String?,
+      updated_by: json['updated_by'] as String?,
+      created_by: json['created_by'] as String?,
+      is_blocked: json['is_blocked'] as int?,
+      tmp_email: json['tmp_email'] as String?,
+      created_on: json['created_on'] as String?,
+    );
+
+Map<String, dynamic> _$ApiUserGetResponseToJson(ApiUserGetResponse instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'first_name': instance.first_name,
+      'last_name': instance.last_name,
+      'email_address': instance.email_address,
+      'username': instance.username,
+      'algorithm': instance.algorithm,
+      'salt': instance.salt,
+      'password': instance.password,
+      'is_active': instance.is_active,
+      'is_super_admin': instance.is_super_admin,
+      'last_login': instance.last_login,
+      'created_at': instance.created_at,
+      'updated_at': instance.updated_at,
+      'patronymic': instance.patronymic,
+      'updated_by': instance.updated_by,
+      'created_by': instance.created_by,
+      'is_blocked': instance.is_blocked,
+      'tmp_email': instance.tmp_email,
+      'created_on': instance.created_on,
+    };

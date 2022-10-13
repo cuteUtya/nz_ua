@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:prefs/prefs.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 import './types.dart';
@@ -13,6 +15,7 @@ class NzApi extends StatelessWidget {
   Function(NzApi) onLoad;
   WebViewController? _controller;
   NzState? currState;
+  String? token;
   final BehaviorSubject<NzState> _state = BehaviorSubject();
   Stream<NzState> get state => _state.stream;
   late BuildContext _context;
@@ -31,7 +34,6 @@ class NzApi extends StatelessWidget {
           initialUrl: '$baseUrl/menu',
           onPageFinished: (c) {
             _onUrlChange(c);
-
             if (!_inited && _controller != null) {
               _inited = true;
               _loaded = true;
@@ -40,7 +42,8 @@ class NzApi extends StatelessWidget {
           },
           onWebViewCreated: (c) {
             _controller = c.webViewController;
-            print(_controller);
+            token = Prefs.getString('apiToken');
+            print(token);
             if (!_inited && !_loaded) {
               _inited = true;
               _loaded = true;
@@ -66,7 +69,6 @@ class NzApi extends StatelessWidget {
   }
 
   Future<SideMetadata> _getMetadata() async {
-    var j = json.decode(await _executeScript('getMetadata.js'));
     return SideMetadata.fromJson(
         json.decode(await _executeScript('getMetadata.js')));
   }
@@ -75,6 +77,7 @@ class NzApi extends StatelessWidget {
     var path = url.substring(baseUrl.length, url.length);
     print(path);
     switch (path) {
+      case '/':
       case '/login':
         _changeState(NeedLoginState());
         break;
@@ -88,13 +91,25 @@ class NzApi extends StatelessWidget {
       case '/dashboard/news':
         var tabs =
             TabSet.fromJson(json.decode(await _executeScript('getTabs.js')));
-        var news = NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
+        var news =
+            NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
         var meta = await _getMetadata();
-        _changeState(NewsPageState(
-            tabs: tabs,
-            news: news,
-            meta: meta));
+        _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
+    }
+
+    var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
+    if (userProfileRegex.hasMatch(url)) {
+      var meta = await _getMetadata();
+      var p = await _executeScript('getProfile.js');
+      var v = ProfilePageState(
+          profile: UserProfile.fromJson(
+            json.decode(
+              p,
+            ),
+          ),
+          meta: meta);
+      _changeState(v);
     }
   }
 
@@ -113,6 +128,37 @@ class NzApi extends StatelessWidget {
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
     await clickButton(ClassName('ms-button form-submit-btn'));
+
+    var dio = Dio();
+    dio.options.contentType = "application/json";
+    Prefs.setString('username', name);
+    Prefs.setString('password', password);
+    try {
+      var s = await dio.post('http://api-mobile.nz.ua/v1/user/login', data: """{
+        "username": "$name",
+        "password": "$password"
+      }""");
+      var response = ApiLoginResponse.fromJson(s.data);
+      token = response.access_token;
+      Prefs.setString('apiToken', token);
+    } catch (e) {
+      throw Exception('хз, якась залупа на сервері');
+    }
+  }
+
+  Future<ApiUserGetResponse?> _getAdditionalUserInfo(int id) async {
+    try {
+      var d = Dio();
+      d.options.headers['content-type'] = 'application/json';
+      d.options.headers['Authorization'] = 'Bearer $token';
+      var r = await d.get('http://api-mobile.nz.ua/v1/user/$id');
+
+      if (r.statusCode == 200) {
+        return ApiUserGetResponse.fromJson(r.data);
+      }
+    } catch (_) {
+      print('err');
+    }
   }
 
   void toggleCheckBox(ElementIdentifier identifier, bool value) async {

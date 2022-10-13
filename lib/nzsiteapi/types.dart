@@ -40,10 +40,10 @@ class MainPageState implements NzState {}
 /// /id{id}
 class ProfilePageState implements NzState {
   ProfilePageState({
-    required this.me,
+    required this.profile,
     required this.meta,
   });
-  final UserProfile me;
+  final UserProfile profile;
   final SideMetadata meta;
 }
 
@@ -457,15 +457,27 @@ class Exercise {
 @JsonSerializable()
 class UserProfile {
   UserProfile({
+    required this.isTeacher,
     required this.fullName,
+    required this.subjects,
+    required this.classes,
+    required this.formMasterOf,
+    required this.currentClass,
     required this.birthDate,
     required this.photoProfileUrl,
     required this.parents,
+    required this.schoolName,
   });
+  final bool isTeacher;
   final String fullName;
+  final List<String>? classes;
+  final String? formMasterOf;
+  final List<String>? subjects;
+  final String schoolName;
+  final String? currentClass;
   final String birthDate;
   final String photoProfileUrl;
-  final List<String> parents;
+  final List<String>? parents;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>
       _$UserProfileFromJson(json);
@@ -508,6 +520,88 @@ class Parent {
 
   factory Parent.fromJson(Map<String, dynamic> json) => _$ParentFromJson(json);
   Map<String, dynamic> toJson() => _$ParentToJson(this);
+}
+
+
+@JsonSerializable()
+class ApiLoginResponse {
+  ApiLoginResponse({required this.access_token, required this.refresh_token, required this.email_hash, required this.student_id, required this.avatar, required this.error_message, required this.FIO, required this.permissions,});
+  final String access_token;
+  final String refresh_token;
+  final String email_hash;
+  final int student_id;
+  final String FIO;
+  final AvatarResponse avatar;
+  final PermissionsResponse permissions;
+  final String error_message;
+
+  factory ApiLoginResponse.fromJson(Map<String, dynamic> json) => _$ApiLoginResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ApiLoginResponseToJson(this);
+}
+
+@JsonSerializable()
+class PermissionsResponse {
+  PermissionsResponse({required this.isuo_nzportal_children});
+  final List<String> isuo_nzportal_children;
+
+  factory PermissionsResponse.fromJson(Map<String, dynamic> json) => _$PermissionsResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$PermissionsResponseToJson(this);
+}
+
+@JsonSerializable()
+class AvatarResponse {
+  AvatarResponse({required this.image_url, required this.datetime});
+  final String? image_url;
+  final String? datetime;
+
+  factory AvatarResponse.fromJson(Map<String, dynamic> json) => _$AvatarResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$AvatarResponseToJson(this);
+}
+
+@JsonSerializable()
+class ApiUserGetResponse {
+  final int? id;
+  final String? first_name;
+  final String? last_name;
+  final String? email_address;
+  final String? username;
+  final String? algorithm;
+  final String? salt;
+  final String? password;
+  final int? is_active;
+  final int? is_super_admin;
+  final String? last_login;
+  final String? created_at;
+  final String? updated_at;
+  final String? patronymic;
+  final String? updated_by;
+  final String? created_by;
+  final int? is_blocked;
+  final String? tmp_email;
+  final String? created_on;
+
+  ApiUserGetResponse({this.id,
+    this.first_name,
+    this.last_name,
+    this.email_address,
+    this.username,
+    this.algorithm,
+    this.salt,
+    this.password,
+    this.is_active,
+    this.is_super_admin,
+    this.last_login,
+    this.created_at,
+    this.updated_at,
+    this.patronymic,
+    this.updated_by,
+    this.created_by,
+    this.is_blocked,
+    this.tmp_email,
+    this.created_on});
+
+  factory ApiUserGetResponse.fromJson(Map<String, dynamic> json) => _$ApiUserGetResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ApiUserGetResponseToJson(this);
 }
 
 enum ParentRole {
