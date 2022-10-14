@@ -59,13 +59,13 @@ class NewsPageState implements NzState {
   final SideMetadata meta;
 }
 
-/// /school{id}/schedule/diary
+/// /school{id}/schedule/diary?student_id=
 class DiaryPageState implements NzState {
   DiaryPageState({
     required this.content,
     required this.meta,
   });
-  final DiaryContent content;
+  final DiaryContentTopToDown content;
   final SideMetadata meta;
 }
 
@@ -222,8 +222,12 @@ class Mark {
 }
 
 @JsonSerializable()
-class DiaryContentTopToDown implements DiaryContent {
-  DiaryContentTopToDown({required this.content});
+class DiaryContentTopToDown {
+  DiaryContentTopToDown({
+    required this.content,
+    required this.interval,
+  });
+  final DateTimeInterval interval;
   final List<DiaryDayTopToDown> content;
 
   factory DiaryContentTopToDown.fromJson(Map<String, dynamic> json) =>
@@ -255,7 +259,8 @@ class DiaryLine {
   final int index;
 
   final DateTimeInterval lessonTime;
-  final DiaryLineContent? content;
+  /// it can be two or more lessons for one period
+  final List<DiaryLineContent>? content;
 
   factory DiaryLine.fromJson(Map<String, dynamic> json) =>
       _$DiaryLineFromJson(json);
@@ -275,7 +280,7 @@ class DiaryLineContent {
   final int name;
   final String topic;
   final String classAudience;
-  final List<String> homework;
+  final List<String>? homework;
   final String? mark;
   /**Поточна/лабараторна/контрольна - те, що і Mark.theme*/
   final String workType;
@@ -334,13 +339,14 @@ class NewsArr {
   NewsArr({required this.news});
   final List<News> news;
 
-  factory NewsArr.fromJson(Map<String, dynamic> json) => _$NewsArrFromJson(json);
+  factory NewsArr.fromJson(Map<String, dynamic> json) =>
+      _$NewsArrFromJson(json);
   Map<String, dynamic> toJson() => _$NewsArrToJson(this);
 }
 
 @JsonSerializable()
 class News {
-  News ({
+  News({
     this.author,
     required this.newsTime,
     required this.news,
@@ -348,7 +354,6 @@ class News {
   final NewsAuthor? author;
   final String newsTime;
   final String news;
-
 
   factory News.fromJson(Map<String, dynamic> json) => _$NewsFromJson(json);
   Map<String, dynamic> toJson() => _$NewsToJson(this);
@@ -522,10 +527,18 @@ class Parent {
   Map<String, dynamic> toJson() => _$ParentToJson(this);
 }
 
-
 @JsonSerializable()
 class ApiLoginResponse {
-  ApiLoginResponse({required this.access_token, required this.refresh_token, required this.email_hash, required this.student_id, required this.avatar, required this.error_message, required this.FIO, required this.permissions,});
+  ApiLoginResponse({
+    required this.access_token,
+    required this.refresh_token,
+    required this.email_hash,
+    required this.student_id,
+    required this.avatar,
+    required this.error_message,
+    required this.FIO,
+    required this.permissions,
+  });
   final String access_token;
   final String refresh_token;
   final String email_hash;
@@ -535,7 +548,8 @@ class ApiLoginResponse {
   final PermissionsResponse permissions;
   final String error_message;
 
-  factory ApiLoginResponse.fromJson(Map<String, dynamic> json) => _$ApiLoginResponseFromJson(json);
+  factory ApiLoginResponse.fromJson(Map<String, dynamic> json) =>
+      _$ApiLoginResponseFromJson(json);
   Map<String, dynamic> toJson() => _$ApiLoginResponseToJson(this);
 }
 
@@ -544,7 +558,8 @@ class PermissionsResponse {
   PermissionsResponse({required this.isuo_nzportal_children});
   final List<String> isuo_nzportal_children;
 
-  factory PermissionsResponse.fromJson(Map<String, dynamic> json) => _$PermissionsResponseFromJson(json);
+  factory PermissionsResponse.fromJson(Map<String, dynamic> json) =>
+      _$PermissionsResponseFromJson(json);
   Map<String, dynamic> toJson() => _$PermissionsResponseToJson(this);
 }
 
@@ -554,7 +569,8 @@ class AvatarResponse {
   final String? image_url;
   final String? datetime;
 
-  factory AvatarResponse.fromJson(Map<String, dynamic> json) => _$AvatarResponseFromJson(json);
+  factory AvatarResponse.fromJson(Map<String, dynamic> json) =>
+      _$AvatarResponseFromJson(json);
   Map<String, dynamic> toJson() => _$AvatarResponseToJson(this);
 }
 
@@ -580,27 +596,29 @@ class ApiUserGetResponse {
   final String? tmp_email;
   final String? created_on;
 
-  ApiUserGetResponse({this.id,
-    this.first_name,
-    this.last_name,
-    this.email_address,
-    this.username,
-    this.algorithm,
-    this.salt,
-    this.password,
-    this.is_active,
-    this.is_super_admin,
-    this.last_login,
-    this.created_at,
-    this.updated_at,
-    this.patronymic,
-    this.updated_by,
-    this.created_by,
-    this.is_blocked,
-    this.tmp_email,
-    this.created_on});
+  ApiUserGetResponse(
+      {this.id,
+      this.first_name,
+      this.last_name,
+      this.email_address,
+      this.username,
+      this.algorithm,
+      this.salt,
+      this.password,
+      this.is_active,
+      this.is_super_admin,
+      this.last_login,
+      this.created_at,
+      this.updated_at,
+      this.patronymic,
+      this.updated_by,
+      this.created_by,
+      this.is_blocked,
+      this.tmp_email,
+      this.created_on});
 
-  factory ApiUserGetResponse.fromJson(Map<String, dynamic> json) => _$ApiUserGetResponseFromJson(json);
+  factory ApiUserGetResponse.fromJson(Map<String, dynamic> json) =>
+      _$ApiUserGetResponseFromJson(json);
   Map<String, dynamic> toJson() => _$ApiUserGetResponseToJson(this);
 }
 

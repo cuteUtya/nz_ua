@@ -96,6 +96,8 @@ class NzApi extends StatelessWidget {
         var meta = await _getMetadata();
         _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
+
+
     }
 
     var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
@@ -110,6 +112,14 @@ class NzApi extends StatelessWidget {
           ),
           meta: meta);
       _changeState(v);
+    }
+
+    var diaryRegex = RegExp('\/school.*\/schedule.*\/diary');
+    if(diaryRegex.hasMatch(url)) {
+      var a = await _executeScript('getDiary.js');
+      var i = json.decode(a);
+      var diaryContent = DiaryContentTopToDown.fromJson(i);
+      print(diaryContent);
     }
   }
 

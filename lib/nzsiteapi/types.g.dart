@@ -124,11 +124,14 @@ DiaryContentTopToDown _$DiaryContentTopToDownFromJson(
       content: (json['content'] as List<dynamic>)
           .map((e) => DiaryDayTopToDown.fromJson(e as Map<String, dynamic>))
           .toList(),
+      interval:
+          DateTimeInterval.fromJson(json['interval'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DiaryContentTopToDownToJson(
         DiaryContentTopToDown instance) =>
     <String, dynamic>{
+      'interval': instance.interval,
       'content': instance.content,
     };
 
@@ -150,9 +153,9 @@ DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
       index: json['index'] as int,
       lessonTime:
           DateTimeInterval.fromJson(json['lessonTime'] as Map<String, dynamic>),
-      content: json['content'] == null
-          ? null
-          : DiaryLineContent.fromJson(json['content'] as Map<String, dynamic>),
+      content: (json['content'] as List<dynamic>?)
+          ?.map((e) => DiaryLineContent.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$DiaryLineToJson(DiaryLine instance) => <String, dynamic>{
@@ -166,8 +169,9 @@ DiaryLineContent _$DiaryLineContentFromJson(Map<String, dynamic> json) =>
       name: json['name'] as int,
       topic: json['topic'] as String,
       classAudience: json['classAudience'] as String,
-      homework:
-          (json['homework'] as List<dynamic>).map((e) => e as String).toList(),
+      homework: (json['homework'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       workType: json['workType'] as String,
       mark: json['mark'] as String?,
     );
