@@ -23,7 +23,7 @@ days = days.map((e) => {
                     content.push({
                         classAudience: classAudience,
                         name: contentParent.children[0].innerText.replace(classAudience, '').slice(0, -1),
-                        worktype: workType,
+                        workType: workType,
                         topic: curr.replace(`${workType}: `, ''),
                         mark: mark.children[0] == undefined ? undefined : mark.children[0].children[0].innerText,
                         homework: contentParent.children[1].innerText.split('\n').filter((e) => e.slice(0, 4) == "Д/з:")
@@ -34,7 +34,7 @@ days = days.map((e) => {
 
             var t = d.children[1].innerText.split('\n');
             return {
-                index: int.parse(d.children[0].innerText.replace('.', '')),
+                index: parseInt(d.children[0].innerText.replace('.', '')),
                 lessonTime: {
                     from: t[0],
                     to: t[1]
