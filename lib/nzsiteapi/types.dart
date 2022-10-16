@@ -43,8 +43,8 @@ class ProfilePageState implements NzState {
     required this.profile,
     required this.meta,
   });
-  final UserProfile profile;
-  final SideMetadata meta;
+  final UserProfile? profile;
+  final SideMetadata? meta;
 }
 
 /// /dashboard/news
@@ -54,9 +54,9 @@ class NewsPageState implements NzState {
     required this.news,
     required this.meta,
   });
-  final TabSet tabs;
-  final NewsArr news;
-  final SideMetadata meta;
+  final TabSet? tabs;
+  final NewsArr? news;
+  final SideMetadata? meta;
 }
 
 /// /school{id}/schedule/diary?student_id=
@@ -65,18 +65,32 @@ class DiaryPageState implements NzState {
     required this.content,
     required this.meta,
   });
-  final DiaryContentTopToDown content;
-  final SideMetadata meta;
+  final DiaryContentTopToDown? content;
+  final SideMetadata? meta;
+}
+
+class DiaryGridState implements NzState {
+  DiaryGridState({
+    required this.content,
+    required this.meta,
+  });
+  final DiaryMarkGrid? content;
+  final SideMetadata? meta;
 }
 
 /// /schedule/grades-statement?student_id={id}
-class DiaryMarkGrid extends NzState {
+@JsonSerializable()
+class DiaryMarkGrid  {
   DiaryMarkGrid({
     required this.interval,
     required this.lines,
   });
-  final DateTimeInterval interval;
-  final List<DiaryMarkGridLine> lines;
+  final DateTimeInterval? interval;
+  final List<DiaryMarkGridLine>? lines;
+
+  factory DiaryMarkGrid.fromJson(Map<String, dynamic> json) =>
+      _$DiaryMarkGridFromJson(json);
+  Map<String, dynamic> toJson() => _$DiaryMarkGridToJson(this);
 }
 
 @JsonSerializable()
@@ -86,9 +100,9 @@ class DiaryMarkGridLine {
     required this.lessonName,
     required this.marks,
   });
-  final int index;
-  final String lessonName;
-  final List<String> marks;
+  final int? index;
+  final String? lessonName;
+  final List<String>? marks;
 
   factory DiaryMarkGridLine.fromJson(Map<String, dynamic> json) =>
       _$DiaryMarkGridLineFromJson(json);
@@ -100,7 +114,7 @@ class SchedulePageState implements NzState {
     required this.timings,
     required this.days,
   });
-  final List<DateTimeInterval> timings;
+  final List<DateTimeInterval>? timings;
   final List<ScheduleDay>? days;
 }
 
@@ -110,8 +124,8 @@ class SecurityPageState implements NzState {
     required this.email,
     required this.phone,
   });
-  final String login;
-  final EmailStatus email;
+  final String? login;
+  final EmailStatus? email;
   final String? phone;
 }
 
@@ -121,8 +135,8 @@ class EmailStatus {
     required this.email,
     required this.confirmed,
   });
-  final String email;
-  final bool confirmed;
+  final String? email;
+  final bool? confirmed;
 
   factory EmailStatus.fromJson(Map<String, dynamic> json) =>
       _$EmailStatusFromJson(json);
@@ -136,9 +150,9 @@ class ScheduleDay {
     required this.date,
     required this.lessons,
   });
-  final bool today;
-  final String date;
-  final List<ScheduleLesson> lessons;
+  final bool? today;
+  final String? date;
+  final List<ScheduleLesson>? lessons;
 
   factory ScheduleDay.fromJson(Map<String, dynamic> json) =>
       _$ScheduleDayFromJson(json);
@@ -152,9 +166,9 @@ class ScheduleLesson {
     required this.teacher,
     required this.classAudience,
   });
-  final String name;
-  final UserProfileLink teacher;
-  final String classAudience;
+  final String? name;
+  final UserProfileLink? teacher;
+  final String? classAudience;
 
   factory ScheduleLesson.fromJson(Map<String, dynamic> json) =>
       _$ScheduleLessonFromJson(json);
@@ -169,8 +183,8 @@ class DiaryContentTable implements DiaryContent {
     required this.date,
     required this.table,
   });
-  final DateTimeInterval date;
-  final DiaryTable table;
+  final DateTimeInterval? date;
+  final DiaryTable? table;
 
   factory DiaryContentTable.fromJson(Map<String, dynamic> json) =>
       _$DiaryContentTableFromJson(json);
@@ -183,8 +197,8 @@ class DiaryTable {
     required this.dateValues,
     required this.lessonsMarks,
   });
-  final List<String> dateValues;
-  final List<DiaryTableLessonLine> lessonsMarks;
+  final List<String>? dateValues;
+  final List<DiaryTableLessonLine>? lessonsMarks;
 
   factory DiaryTable.fromJson(Map<String, dynamic> json) =>
       _$DiaryTableFromJson(json);
@@ -197,8 +211,8 @@ class DiaryTableLessonLine {
     required this.lessonName,
     required this.marks,
   });
-  final String lessonName;
-  final List<List<Mark>?> marks;
+  final String? lessonName;
+  final List<List<Mark>?>? marks;
 
   factory DiaryTableLessonLine.fromJson(Map<String, dynamic> json) =>
       _$DiaryTableLessonLineFromJson(json);
@@ -212,10 +226,10 @@ class Mark {
     required this.lesson,
     this.theme,
   });
-  final int value;
+  final int? value;
   /**theme? тематична/контрольна/поточна/... */
   final String? theme;
-  final String lesson;
+  final String? lesson;
 
   factory Mark.fromJson(Map<String, dynamic> json) => _$MarkFromJson(json);
   Map<String, dynamic> toJson() => _$MarkToJson(this);
@@ -227,8 +241,8 @@ class DiaryContentTopToDown {
     required this.content,
     required this.interval,
   });
-  final DateTimeInterval interval;
-  final List<DiaryDayTopToDown> content;
+  final DateTimeInterval? interval;
+  final List<DiaryDayTopToDown>? content;
 
   factory DiaryContentTopToDown.fromJson(Map<String, dynamic> json) =>
       _$DiaryContentTopToDownFromJson(json);
@@ -241,8 +255,8 @@ class DiaryDayTopToDown {
     required this.dayDate,
     required this.lines,
   });
-  final String dayDate;
-  final List<DiaryLine> lines;
+  final String? dayDate;
+  final List<DiaryLine>? lines;
 
   factory DiaryDayTopToDown.fromJson(Map<String, dynamic> json) =>
       _$DiaryDayTopToDownFromJson(json);
@@ -256,7 +270,7 @@ class DiaryLine {
     required this.lessonTime,
     this.content,
   });
-  final int index;
+  final int? index;
 
   final DateTimeInterval lessonTime;
   /// it can be two or more lessons for one period
@@ -277,13 +291,13 @@ class DiaryLineContent {
     required this.workType,
     this.mark,
   });
-  final int name;
-  final String topic;
-  final String classAudience;
+  final String? name;
+  final String? topic;
+  final String? classAudience;
   final List<String>? homework;
   final String? mark;
   /**Поточна/лабараторна/контрольна - те, що і Mark.theme*/
-  final String workType;
+  final String? workType;
 
   factory DiaryLineContent.fromJson(Map<String, dynamic> json) =>
       _$DiaryLineContentFromJson(json);
@@ -298,10 +312,10 @@ class SideMetadata {
     required this.closestBirthdays,
     required this.me,
   });
-  final List<Homework> comingHomework;
-  final List<Mark> latestMarks;
-  final List<Birthday> closestBirthdays;
-  final UserProfileLink me;
+  final List<Homework>? comingHomework;
+  final List<Mark>? latestMarks;
+  final List<Birthday>? closestBirthdays;
+  final UserProfileLink? me;
 
   factory SideMetadata.fromJson(Map<String, dynamic> json) =>
       _$SideMetadataFromJson(json);
@@ -314,8 +328,8 @@ class TabSet {
     required this.tabs,
     required this.activeTab,
   });
-  final List<Tab> tabs;
-  final String activeTab;
+  final List<Tab>? tabs;
+  final String? activeTab;
 
   factory TabSet.fromJson(Map<String, dynamic> json) => _$TabSetFromJson(json);
   Map<String, dynamic> toJson() => _$TabSetToJson(this);
@@ -327,8 +341,8 @@ class Tab {
     required this.link,
     required this.name,
   });
-  final String link;
-  final String name;
+  final String? link;
+  final String? name;
 
   factory Tab.fromJson(Map<String, dynamic> json) => _$TabFromJson(json);
   Map<String, dynamic> toJson() => _$TabToJson(this);
@@ -337,7 +351,7 @@ class Tab {
 @JsonSerializable()
 class NewsArr {
   NewsArr({required this.news});
-  final List<News> news;
+  final List<News>? news;
 
   factory NewsArr.fromJson(Map<String, dynamic> json) =>
       _$NewsArrFromJson(json);
@@ -352,8 +366,8 @@ class News {
     required this.news,
   });
   final NewsAuthor? author;
-  final String newsTime;
-  final String news;
+  final String? newsTime;
+  final String? news;
 
   factory News.fromJson(Map<String, dynamic> json) => _$NewsFromJson(json);
   Map<String, dynamic> toJson() => _$NewsToJson(this);
@@ -365,8 +379,8 @@ class NewsContent {
     required this.title,
     required this.textEntityes,
   });
-  final String title;
-  final List<TextEntity> textEntityes;
+  final String? title;
+  final List<TextEntity>? textEntityes;
 
   factory NewsContent.fromJson(Map<String, dynamic> json) =>
       _$NewsContentFromJson(json);
@@ -379,8 +393,8 @@ class TextEntity {
     required this.text,
     required this.entityes,
   });
-  final String text;
-  final List<TextEntityType> entityes;
+  final String? text;
+  final List<TextEntityType>? entityes;
 
   factory TextEntity.fromJson(Map<String, dynamic> json) =>
       _$TextEntityFromJson(json);
@@ -390,7 +404,7 @@ class TextEntity {
 @JsonSerializable()
 class TextEntityType {
   TextEntityType({required this.type, this.hyperlink, this.imageUrl});
-  final String type;
+  final String? type;
   final String? imageUrl;
   final String? hyperlink;
 
@@ -406,9 +420,9 @@ class NewsAuthor {
     required this.profilePhotoUrl,
     required this.profileUrl,
   });
-  final String fullName;
-  final String profilePhotoUrl;
-  final String profileUrl;
+  final String? fullName;
+  final String? profilePhotoUrl;
+  final String? profileUrl;
 
   factory NewsAuthor.fromJson(Map<String, dynamic> json) =>
       _$NewsAuthorFromJson(json);
@@ -418,8 +432,8 @@ class NewsAuthor {
 @JsonSerializable()
 class Semester {
   Semester({required this.id, required this.name});
-  final String name;
-  final String id;
+  final String? name;
+  final String? id;
 
   factory Semester.fromJson(Map<String, dynamic> json) =>
       _$SemesterFromJson(json);
@@ -429,8 +443,8 @@ class Semester {
 @JsonSerializable()
 class Birthday {
   Birthday({required this.date, required this.user});
-  final UserProfileLink user;
-  final String date;
+  final UserProfileLink? user;
+  final String? date;
 
   factory Birthday.fromJson(Map<String, dynamic> json) =>
       _$BirthdayFromJson(json);
@@ -440,8 +454,8 @@ class Birthday {
 @JsonSerializable()
 class Homework {
   Homework({required this.exercises, required this.date});
-  final String date;
-  final List<Exercise> exercises;
+  final String? date;
+  final List<Exercise>? exercises;
 
   factory Homework.fromJson(Map<String, dynamic> json) =>
       _$HomeworkFromJson(json);
@@ -451,8 +465,8 @@ class Homework {
 @JsonSerializable()
 class Exercise {
   Exercise({required this.exercise, required this.lesson});
-  final String lesson;
-  final String exercise;
+  final String? lesson;
+  final String? exercise;
 
   factory Exercise.fromJson(Map<String, dynamic> json) =>
       _$ExerciseFromJson(json);
@@ -473,15 +487,15 @@ class UserProfile {
     required this.parents,
     required this.schoolName,
   });
-  final bool isTeacher;
-  final String fullName;
+  final bool? isTeacher;
+  final String? fullName;
   final List<String>? classes;
   final String? formMasterOf;
   final List<String>? subjects;
-  final String schoolName;
+  final String? schoolName;
   final String? currentClass;
-  final String birthDate;
-  final String photoProfileUrl;
+  final String? birthDate;
+  final String? photoProfileUrl;
   final List<String>? parents;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>
@@ -495,8 +509,8 @@ class UserProfileLink {
     required this.fullName,
     required this.profileUrl,
   });
-  final String fullName;
-  final String profileUrl;
+  final String? fullName;
+  final String? profileUrl;
 
   factory UserProfileLink.fromJson(Map<String, dynamic> json) =>
       _$UserProfileLinkFromJson(json);
@@ -506,8 +520,8 @@ class UserProfileLink {
 @JsonSerializable()
 class DateTimeInterval {
   DateTimeInterval({required this.from, required this.to});
-  final String from;
-  final String to;
+  final String? from;
+  final String? to;
 
   factory DateTimeInterval.fromJson(Map<String, dynamic> json) =>
       _$DateTimeIntervalFromJson(json);
@@ -520,8 +534,8 @@ class Parent {
     required this.fullName,
     required this.role,
   });
-  final String fullName;
-  final ParentRole role;
+  final String? fullName;
+  final ParentRole? role;
 
   factory Parent.fromJson(Map<String, dynamic> json) => _$ParentFromJson(json);
   Map<String, dynamic> toJson() => _$ParentToJson(this);
@@ -539,14 +553,14 @@ class ApiLoginResponse {
     required this.FIO,
     required this.permissions,
   });
-  final String access_token;
-  final String refresh_token;
-  final String email_hash;
-  final int student_id;
-  final String FIO;
-  final AvatarResponse avatar;
-  final PermissionsResponse permissions;
-  final String error_message;
+  final String? access_token;
+  final String? refresh_token;
+  final String? email_hash;
+  final int? student_id;
+  final String? FIO;
+  final AvatarResponse? avatar;
+  final PermissionsResponse? permissions;
+  final String? error_message;
 
   factory ApiLoginResponse.fromJson(Map<String, dynamic> json) =>
       _$ApiLoginResponseFromJson(json);

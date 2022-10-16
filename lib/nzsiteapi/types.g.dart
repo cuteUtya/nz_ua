@@ -6,11 +6,28 @@ part of 'types.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+DiaryMarkGrid _$DiaryMarkGridFromJson(Map<String, dynamic> json) =>
+    DiaryMarkGrid(
+      interval: json['interval'] == null
+          ? null
+          : DateTimeInterval.fromJson(json['interval'] as Map<String, dynamic>),
+      lines: (json['lines'] as List<dynamic>?)
+          ?.map((e) => DiaryMarkGridLine.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$DiaryMarkGridToJson(DiaryMarkGrid instance) =>
+    <String, dynamic>{
+      'interval': instance.interval,
+      'lines': instance.lines,
+    };
+
 DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
     DiaryMarkGridLine(
-      index: json['index'] as int,
-      lessonName: json['lessonName'] as String,
-      marks: (json['marks'] as List<dynamic>).map((e) => e as String).toList(),
+      index: json['index'] as int?,
+      lessonName: json['lessonName'] as String?,
+      marks:
+          (json['marks'] as List<dynamic>?)?.map((e) => e as String).toList(),
     );
 
 Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
@@ -21,8 +38,8 @@ Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
     };
 
 EmailStatus _$EmailStatusFromJson(Map<String, dynamic> json) => EmailStatus(
-      email: json['email'] as String,
-      confirmed: json['confirmed'] as bool,
+      email: json['email'] as String?,
+      confirmed: json['confirmed'] as bool?,
     );
 
 Map<String, dynamic> _$EmailStatusToJson(EmailStatus instance) =>
@@ -32,10 +49,10 @@ Map<String, dynamic> _$EmailStatusToJson(EmailStatus instance) =>
     };
 
 ScheduleDay _$ScheduleDayFromJson(Map<String, dynamic> json) => ScheduleDay(
-      today: json['today'] as bool,
-      date: json['date'] as String,
-      lessons: (json['lessons'] as List<dynamic>)
-          .map((e) => ScheduleLesson.fromJson(e as Map<String, dynamic>))
+      today: json['today'] as bool?,
+      date: json['date'] as String?,
+      lessons: (json['lessons'] as List<dynamic>?)
+          ?.map((e) => ScheduleLesson.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -48,10 +65,11 @@ Map<String, dynamic> _$ScheduleDayToJson(ScheduleDay instance) =>
 
 ScheduleLesson _$ScheduleLessonFromJson(Map<String, dynamic> json) =>
     ScheduleLesson(
-      name: json['name'] as String,
-      teacher:
-          UserProfileLink.fromJson(json['teacher'] as Map<String, dynamic>),
-      classAudience: json['classAudience'] as String,
+      name: json['name'] as String?,
+      teacher: json['teacher'] == null
+          ? null
+          : UserProfileLink.fromJson(json['teacher'] as Map<String, dynamic>),
+      classAudience: json['classAudience'] as String?,
     );
 
 Map<String, dynamic> _$ScheduleLessonToJson(ScheduleLesson instance) =>
@@ -63,8 +81,12 @@ Map<String, dynamic> _$ScheduleLessonToJson(ScheduleLesson instance) =>
 
 DiaryContentTable _$DiaryContentTableFromJson(Map<String, dynamic> json) =>
     DiaryContentTable(
-      date: DateTimeInterval.fromJson(json['date'] as Map<String, dynamic>),
-      table: DiaryTable.fromJson(json['table'] as Map<String, dynamic>),
+      date: json['date'] == null
+          ? null
+          : DateTimeInterval.fromJson(json['date'] as Map<String, dynamic>),
+      table: json['table'] == null
+          ? null
+          : DiaryTable.fromJson(json['table'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DiaryContentTableToJson(DiaryContentTable instance) =>
@@ -74,11 +96,11 @@ Map<String, dynamic> _$DiaryContentTableToJson(DiaryContentTable instance) =>
     };
 
 DiaryTable _$DiaryTableFromJson(Map<String, dynamic> json) => DiaryTable(
-      dateValues: (json['dateValues'] as List<dynamic>)
-          .map((e) => e as String)
+      dateValues: (json['dateValues'] as List<dynamic>?)
+          ?.map((e) => e as String)
           .toList(),
-      lessonsMarks: (json['lessonsMarks'] as List<dynamic>)
-          .map((e) => DiaryTableLessonLine.fromJson(e as Map<String, dynamic>))
+      lessonsMarks: (json['lessonsMarks'] as List<dynamic>?)
+          ?.map((e) => DiaryTableLessonLine.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -91,9 +113,9 @@ Map<String, dynamic> _$DiaryTableToJson(DiaryTable instance) =>
 DiaryTableLessonLine _$DiaryTableLessonLineFromJson(
         Map<String, dynamic> json) =>
     DiaryTableLessonLine(
-      lessonName: json['lessonName'] as String,
-      marks: (json['marks'] as List<dynamic>)
-          .map((e) => (e as List<dynamic>?)
+      lessonName: json['lessonName'] as String?,
+      marks: (json['marks'] as List<dynamic>?)
+          ?.map((e) => (e as List<dynamic>?)
               ?.map((e) => Mark.fromJson(e as Map<String, dynamic>))
               .toList())
           .toList(),
@@ -107,8 +129,8 @@ Map<String, dynamic> _$DiaryTableLessonLineToJson(
     };
 
 Mark _$MarkFromJson(Map<String, dynamic> json) => Mark(
-      value: json['value'] as int,
-      lesson: json['lesson'] as String,
+      value: json['value'] as int?,
+      lesson: json['lesson'] as String?,
       theme: json['theme'] as String?,
     );
 
@@ -121,11 +143,12 @@ Map<String, dynamic> _$MarkToJson(Mark instance) => <String, dynamic>{
 DiaryContentTopToDown _$DiaryContentTopToDownFromJson(
         Map<String, dynamic> json) =>
     DiaryContentTopToDown(
-      content: (json['content'] as List<dynamic>)
-          .map((e) => DiaryDayTopToDown.fromJson(e as Map<String, dynamic>))
+      content: (json['content'] as List<dynamic>?)
+          ?.map((e) => DiaryDayTopToDown.fromJson(e as Map<String, dynamic>))
           .toList(),
-      interval:
-          DateTimeInterval.fromJson(json['interval'] as Map<String, dynamic>),
+      interval: json['interval'] == null
+          ? null
+          : DateTimeInterval.fromJson(json['interval'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$DiaryContentTopToDownToJson(
@@ -137,9 +160,9 @@ Map<String, dynamic> _$DiaryContentTopToDownToJson(
 
 DiaryDayTopToDown _$DiaryDayTopToDownFromJson(Map<String, dynamic> json) =>
     DiaryDayTopToDown(
-      dayDate: json['dayDate'] as String,
-      lines: (json['lines'] as List<dynamic>)
-          .map((e) => DiaryLine.fromJson(e as Map<String, dynamic>))
+      dayDate: json['dayDate'] as String?,
+      lines: (json['lines'] as List<dynamic>?)
+          ?.map((e) => DiaryLine.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -150,7 +173,7 @@ Map<String, dynamic> _$DiaryDayTopToDownToJson(DiaryDayTopToDown instance) =>
     };
 
 DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
-      index: json['index'] as int,
+      index: json['index'] as int?,
       lessonTime:
           DateTimeInterval.fromJson(json['lessonTime'] as Map<String, dynamic>),
       content: (json['content'] as List<dynamic>?)
@@ -166,13 +189,13 @@ Map<String, dynamic> _$DiaryLineToJson(DiaryLine instance) => <String, dynamic>{
 
 DiaryLineContent _$DiaryLineContentFromJson(Map<String, dynamic> json) =>
     DiaryLineContent(
-      name: json['name'] as int,
-      topic: json['topic'] as String,
-      classAudience: json['classAudience'] as String,
+      name: json['name'] as String?,
+      topic: json['topic'] as String?,
+      classAudience: json['classAudience'] as String?,
       homework: (json['homework'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      workType: json['workType'] as String,
+      workType: json['workType'] as String?,
       mark: json['mark'] as String?,
     );
 
@@ -187,16 +210,18 @@ Map<String, dynamic> _$DiaryLineContentToJson(DiaryLineContent instance) =>
     };
 
 SideMetadata _$SideMetadataFromJson(Map<String, dynamic> json) => SideMetadata(
-      comingHomework: (json['comingHomework'] as List<dynamic>)
-          .map((e) => Homework.fromJson(e as Map<String, dynamic>))
+      comingHomework: (json['comingHomework'] as List<dynamic>?)
+          ?.map((e) => Homework.fromJson(e as Map<String, dynamic>))
           .toList(),
-      latestMarks: (json['latestMarks'] as List<dynamic>)
-          .map((e) => Mark.fromJson(e as Map<String, dynamic>))
+      latestMarks: (json['latestMarks'] as List<dynamic>?)
+          ?.map((e) => Mark.fromJson(e as Map<String, dynamic>))
           .toList(),
-      closestBirthdays: (json['closestBirthdays'] as List<dynamic>)
-          .map((e) => Birthday.fromJson(e as Map<String, dynamic>))
+      closestBirthdays: (json['closestBirthdays'] as List<dynamic>?)
+          ?.map((e) => Birthday.fromJson(e as Map<String, dynamic>))
           .toList(),
-      me: UserProfileLink.fromJson(json['me'] as Map<String, dynamic>),
+      me: json['me'] == null
+          ? null
+          : UserProfileLink.fromJson(json['me'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SideMetadataToJson(SideMetadata instance) =>
@@ -208,10 +233,10 @@ Map<String, dynamic> _$SideMetadataToJson(SideMetadata instance) =>
     };
 
 TabSet _$TabSetFromJson(Map<String, dynamic> json) => TabSet(
-      tabs: (json['tabs'] as List<dynamic>)
-          .map((e) => Tab.fromJson(e as Map<String, dynamic>))
+      tabs: (json['tabs'] as List<dynamic>?)
+          ?.map((e) => Tab.fromJson(e as Map<String, dynamic>))
           .toList(),
-      activeTab: json['activeTab'] as String,
+      activeTab: json['activeTab'] as String?,
     );
 
 Map<String, dynamic> _$TabSetToJson(TabSet instance) => <String, dynamic>{
@@ -220,8 +245,8 @@ Map<String, dynamic> _$TabSetToJson(TabSet instance) => <String, dynamic>{
     };
 
 Tab _$TabFromJson(Map<String, dynamic> json) => Tab(
-      link: json['link'] as String,
-      name: json['name'] as String,
+      link: json['link'] as String?,
+      name: json['name'] as String?,
     );
 
 Map<String, dynamic> _$TabToJson(Tab instance) => <String, dynamic>{
@@ -230,8 +255,8 @@ Map<String, dynamic> _$TabToJson(Tab instance) => <String, dynamic>{
     };
 
 NewsArr _$NewsArrFromJson(Map<String, dynamic> json) => NewsArr(
-      news: (json['news'] as List<dynamic>)
-          .map((e) => News.fromJson(e as Map<String, dynamic>))
+      news: (json['news'] as List<dynamic>?)
+          ?.map((e) => News.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -243,8 +268,8 @@ News _$NewsFromJson(Map<String, dynamic> json) => News(
       author: json['author'] == null
           ? null
           : NewsAuthor.fromJson(json['author'] as Map<String, dynamic>),
-      newsTime: json['newsTime'] as String,
-      news: json['news'] as String,
+      newsTime: json['newsTime'] as String?,
+      news: json['news'] as String?,
     );
 
 Map<String, dynamic> _$NewsToJson(News instance) => <String, dynamic>{
@@ -254,9 +279,9 @@ Map<String, dynamic> _$NewsToJson(News instance) => <String, dynamic>{
     };
 
 NewsContent _$NewsContentFromJson(Map<String, dynamic> json) => NewsContent(
-      title: json['title'] as String,
-      textEntityes: (json['textEntityes'] as List<dynamic>)
-          .map((e) => TextEntity.fromJson(e as Map<String, dynamic>))
+      title: json['title'] as String?,
+      textEntityes: (json['textEntityes'] as List<dynamic>?)
+          ?.map((e) => TextEntity.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -267,9 +292,9 @@ Map<String, dynamic> _$NewsContentToJson(NewsContent instance) =>
     };
 
 TextEntity _$TextEntityFromJson(Map<String, dynamic> json) => TextEntity(
-      text: json['text'] as String,
-      entityes: (json['entityes'] as List<dynamic>)
-          .map((e) => TextEntityType.fromJson(e as Map<String, dynamic>))
+      text: json['text'] as String?,
+      entityes: (json['entityes'] as List<dynamic>?)
+          ?.map((e) => TextEntityType.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -281,7 +306,7 @@ Map<String, dynamic> _$TextEntityToJson(TextEntity instance) =>
 
 TextEntityType _$TextEntityTypeFromJson(Map<String, dynamic> json) =>
     TextEntityType(
-      type: json['type'] as String,
+      type: json['type'] as String?,
       hyperlink: json['hyperlink'] as String?,
       imageUrl: json['imageUrl'] as String?,
     );
@@ -294,9 +319,9 @@ Map<String, dynamic> _$TextEntityTypeToJson(TextEntityType instance) =>
     };
 
 NewsAuthor _$NewsAuthorFromJson(Map<String, dynamic> json) => NewsAuthor(
-      fullName: json['fullName'] as String,
-      profilePhotoUrl: json['profilePhotoUrl'] as String,
-      profileUrl: json['profileUrl'] as String,
+      fullName: json['fullName'] as String?,
+      profilePhotoUrl: json['profilePhotoUrl'] as String?,
+      profileUrl: json['profileUrl'] as String?,
     );
 
 Map<String, dynamic> _$NewsAuthorToJson(NewsAuthor instance) =>
@@ -307,8 +332,8 @@ Map<String, dynamic> _$NewsAuthorToJson(NewsAuthor instance) =>
     };
 
 Semester _$SemesterFromJson(Map<String, dynamic> json) => Semester(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String?,
+      name: json['name'] as String?,
     );
 
 Map<String, dynamic> _$SemesterToJson(Semester instance) => <String, dynamic>{
@@ -317,8 +342,10 @@ Map<String, dynamic> _$SemesterToJson(Semester instance) => <String, dynamic>{
     };
 
 Birthday _$BirthdayFromJson(Map<String, dynamic> json) => Birthday(
-      date: json['date'] as String,
-      user: UserProfileLink.fromJson(json['user'] as Map<String, dynamic>),
+      date: json['date'] as String?,
+      user: json['user'] == null
+          ? null
+          : UserProfileLink.fromJson(json['user'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$BirthdayToJson(Birthday instance) => <String, dynamic>{
@@ -327,10 +354,10 @@ Map<String, dynamic> _$BirthdayToJson(Birthday instance) => <String, dynamic>{
     };
 
 Homework _$HomeworkFromJson(Map<String, dynamic> json) => Homework(
-      exercises: (json['exercises'] as List<dynamic>)
-          .map((e) => Exercise.fromJson(e as Map<String, dynamic>))
+      exercises: (json['exercises'] as List<dynamic>?)
+          ?.map((e) => Exercise.fromJson(e as Map<String, dynamic>))
           .toList(),
-      date: json['date'] as String,
+      date: json['date'] as String?,
     );
 
 Map<String, dynamic> _$HomeworkToJson(Homework instance) => <String, dynamic>{
@@ -339,8 +366,8 @@ Map<String, dynamic> _$HomeworkToJson(Homework instance) => <String, dynamic>{
     };
 
 Exercise _$ExerciseFromJson(Map<String, dynamic> json) => Exercise(
-      exercise: json['exercise'] as String,
-      lesson: json['lesson'] as String,
+      exercise: json['exercise'] as String?,
+      lesson: json['lesson'] as String?,
     );
 
 Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
@@ -349,8 +376,8 @@ Map<String, dynamic> _$ExerciseToJson(Exercise instance) => <String, dynamic>{
     };
 
 UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => UserProfile(
-      isTeacher: json['isTeacher'] as bool,
-      fullName: json['fullName'] as String,
+      isTeacher: json['isTeacher'] as bool?,
+      fullName: json['fullName'] as String?,
       subjects: (json['subjects'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -358,11 +385,11 @@ UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => UserProfile(
           (json['classes'] as List<dynamic>?)?.map((e) => e as String).toList(),
       formMasterOf: json['formMasterOf'] as String?,
       currentClass: json['currentClass'] as String?,
-      birthDate: json['birthDate'] as String,
-      photoProfileUrl: json['photoProfileUrl'] as String,
+      birthDate: json['birthDate'] as String?,
+      photoProfileUrl: json['photoProfileUrl'] as String?,
       parents:
           (json['parents'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      schoolName: json['schoolName'] as String,
+      schoolName: json['schoolName'] as String?,
     );
 
 Map<String, dynamic> _$UserProfileToJson(UserProfile instance) =>
@@ -381,8 +408,8 @@ Map<String, dynamic> _$UserProfileToJson(UserProfile instance) =>
 
 UserProfileLink _$UserProfileLinkFromJson(Map<String, dynamic> json) =>
     UserProfileLink(
-      fullName: json['fullName'] as String,
-      profileUrl: json['profileUrl'] as String,
+      fullName: json['fullName'] as String?,
+      profileUrl: json['profileUrl'] as String?,
     );
 
 Map<String, dynamic> _$UserProfileLinkToJson(UserProfileLink instance) =>
@@ -393,8 +420,8 @@ Map<String, dynamic> _$UserProfileLinkToJson(UserProfileLink instance) =>
 
 DateTimeInterval _$DateTimeIntervalFromJson(Map<String, dynamic> json) =>
     DateTimeInterval(
-      from: json['from'] as String,
-      to: json['to'] as String,
+      from: json['from'] as String?,
+      to: json['to'] as String?,
     );
 
 Map<String, dynamic> _$DateTimeIntervalToJson(DateTimeInterval instance) =>
@@ -404,13 +431,13 @@ Map<String, dynamic> _$DateTimeIntervalToJson(DateTimeInterval instance) =>
     };
 
 Parent _$ParentFromJson(Map<String, dynamic> json) => Parent(
-      fullName: json['fullName'] as String,
-      role: $enumDecode(_$ParentRoleEnumMap, json['role']),
+      fullName: json['fullName'] as String?,
+      role: $enumDecodeNullable(_$ParentRoleEnumMap, json['role']),
     );
 
 Map<String, dynamic> _$ParentToJson(Parent instance) => <String, dynamic>{
       'fullName': instance.fullName,
-      'role': _$ParentRoleEnumMap[instance.role]!,
+      'role': _$ParentRoleEnumMap[instance.role],
     };
 
 const _$ParentRoleEnumMap = {
@@ -420,15 +447,19 @@ const _$ParentRoleEnumMap = {
 
 ApiLoginResponse _$ApiLoginResponseFromJson(Map<String, dynamic> json) =>
     ApiLoginResponse(
-      access_token: json['access_token'] as String,
-      refresh_token: json['refresh_token'] as String,
-      email_hash: json['email_hash'] as String,
-      student_id: json['student_id'] as int,
-      avatar: AvatarResponse.fromJson(json['avatar'] as Map<String, dynamic>),
-      error_message: json['error_message'] as String,
-      FIO: json['FIO'] as String,
-      permissions: PermissionsResponse.fromJson(
-          json['permissions'] as Map<String, dynamic>),
+      access_token: json['access_token'] as String?,
+      refresh_token: json['refresh_token'] as String?,
+      email_hash: json['email_hash'] as String?,
+      student_id: json['student_id'] as int?,
+      avatar: json['avatar'] == null
+          ? null
+          : AvatarResponse.fromJson(json['avatar'] as Map<String, dynamic>),
+      error_message: json['error_message'] as String?,
+      FIO: json['FIO'] as String?,
+      permissions: json['permissions'] == null
+          ? null
+          : PermissionsResponse.fromJson(
+              json['permissions'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ApiLoginResponseToJson(ApiLoginResponse instance) =>
