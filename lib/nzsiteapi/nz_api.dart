@@ -79,7 +79,13 @@ class NzApi extends StatelessWidget {
     switch (path) {
       case '/':
       case '/login':
+        var u = Prefs.getString('username');
+        var p = Prefs.getString('password');
         _changeState(NeedLoginState());
+        if(u != "" && p != "") {
+          print('login');
+          await login(u, p);
+        }
         break;
       case '/menu':
         //we already login
@@ -96,8 +102,6 @@ class NzApi extends StatelessWidget {
         var meta = await _getMetadata();
         _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
-
-
     }
 
     var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
@@ -115,18 +119,39 @@ class NzApi extends StatelessWidget {
     }
 
     var diaryRegex = RegExp('\/school.*\/schedule.*\/diary');
-    if(diaryRegex.hasMatch(url)) {
-      var a = await _executeScript('getDiary.js');
-      var i = json.decode(a);
-      var diaryContent = DiaryContentTopToDown.fromJson(i);
-      print(diaryContent);
+    if (diaryRegex.hasMatch(url)) {
+      _changeState(
+        DiaryPageState(
+          content: DiaryContentTopToDown.fromJson(
+            json.decode(
+              await _executeScript('getDiary.js'),
+            ),
+          ),
+          meta: await _getMetadata(),
+        ),
+      );
+    }
+
+    var diaryGridRegex = RegExp('\/schedule\/grades-statement');
+    if (diaryGridRegex.hasMatch(url)) {
+      var b = await _executeScript('getDiaryGridTable.js');
+      var a = json.decode(b);
+      _changeState(
+        DiaryGridState(
+          content: DiaryMarkGrid.fromJson(
+            a,
+          ),
+          meta: await _getMetadata(),
+        ),
+      );
     }
   }
 
   Future<String> _executeScript(String script) async {
     var str = await DefaultAssetBundle.of(_context)
         .loadString('Assets/scripts/$script');
-    return (await _controller!.runJavascriptReturningResult(str)).toString();
+    var i = (await _controller!.runJavascriptReturningResult(str));
+    return i.toString();
   }
 
   bool _currentStateIs(Type type) {
@@ -141,8 +166,8 @@ class NzApi extends StatelessWidget {
 
     var dio = Dio();
     dio.options.contentType = "application/json";
-    Prefs.setString('username', name);
-    Prefs.setString('password', password);
+    await Prefs.setString('username', name);
+    await Prefs.setString('password', password);
     try {
       var s = await dio.post('http://api-mobile.nz.ua/v1/user/login', data: """{
         "username": "$name",
@@ -150,7 +175,7 @@ class NzApi extends StatelessWidget {
       }""");
       var response = ApiLoginResponse.fromJson(s.data);
       token = response.access_token;
-      Prefs.setString('apiToken', token);
+      await Prefs.setString('apiToken', token);
     } catch (e) {
       throw Exception('хз, якась залупа на сервері');
     }
