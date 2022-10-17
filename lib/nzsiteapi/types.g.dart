@@ -37,6 +37,23 @@ Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
       'marks': instance.marks,
     };
 
+SchedulePageContent _$SchedulePageContentFromJson(Map<String, dynamic> json) =>
+    SchedulePageContent(
+      timings: (json['timings'] as List<dynamic>?)
+          ?.map((e) => DateTimeInterval.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      days: (json['days'] as List<dynamic>?)
+          ?.map((e) => ScheduleDay.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$SchedulePageContentToJson(
+        SchedulePageContent instance) =>
+    <String, dynamic>{
+      'timings': instance.timings,
+      'days': instance.days,
+    };
+
 EmailStatus _$EmailStatusFromJson(Map<String, dynamic> json) => EmailStatus(
       email: json['email'] as String?,
       confirmed: json['confirmed'] as bool?,
@@ -52,7 +69,9 @@ ScheduleDay _$ScheduleDayFromJson(Map<String, dynamic> json) => ScheduleDay(
       today: json['today'] as bool?,
       date: json['date'] as String?,
       lessons: (json['lessons'] as List<dynamic>?)
-          ?.map((e) => ScheduleLesson.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => e == null
+              ? null
+              : ScheduleLesson.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

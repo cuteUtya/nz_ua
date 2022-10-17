@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'types.g.dart';
@@ -110,12 +111,23 @@ class DiaryMarkGridLine {
 }
 
 class SchedulePageState implements NzState {
-  SchedulePageState({
+  SchedulePageState({required this.metadata, required this.content,});
+  final SchedulePageContent content;
+  final SideMetadata? metadata;
+}
+
+@JsonSerializable()
+class SchedulePageContent {
+  SchedulePageContent({
     required this.timings,
     required this.days,
   });
   final List<DateTimeInterval>? timings;
   final List<ScheduleDay>? days;
+
+  factory SchedulePageContent.fromJson(Map<String, dynamic> json) =>
+      _$SchedulePageContentFromJson(json);
+  Map<String, dynamic> toJson() => _$SchedulePageContentToJson(this);
 }
 
 class SecurityPageState implements NzState {
@@ -152,7 +164,7 @@ class ScheduleDay {
   });
   final bool? today;
   final String? date;
-  final List<ScheduleLesson>? lessons;
+  final List<ScheduleLesson?>? lessons;
 
   factory ScheduleDay.fromJson(Map<String, dynamic> json) =>
       _$ScheduleDayFromJson(json);

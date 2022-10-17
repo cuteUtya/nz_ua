@@ -82,7 +82,7 @@ class NzApi extends StatelessWidget {
         var u = Prefs.getString('username');
         var p = Prefs.getString('password');
         _changeState(NeedLoginState());
-        if(u != "" && p != "") {
+        if (u != "" && p != "") {
           print('login');
           await login(u, p);
         }
@@ -102,6 +102,7 @@ class NzApi extends StatelessWidget {
         var meta = await _getMetadata();
         _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
+    
     }
 
     var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
@@ -134,14 +135,26 @@ class NzApi extends StatelessWidget {
 
     var diaryGridRegex = RegExp('\/schedule\/grades-statement');
     if (diaryGridRegex.hasMatch(url)) {
-      var b = await _executeScript('getDiaryGridTable.js');
-      var a = json.decode(b);
       _changeState(
         DiaryGridState(
           content: DiaryMarkGrid.fromJson(
-            a,
+            json.decode(await _executeScript('getDiaryGridTable.js')),
           ),
           meta: await _getMetadata(),
+        ),
+      );
+    }
+
+    var scheduleRegex = RegExp('school.*\/schedule');
+    if (scheduleRegex.hasMatch(url)) {
+      _changeState(
+        SchedulePageState(
+          content: SchedulePageContent.fromJson(
+            json.decode(
+              await _executeScript('getSchedule.js'),
+            ),
+          ),
+          metadata: await _getMetadata(),
         ),
       );
     }
