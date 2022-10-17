@@ -102,7 +102,26 @@ class NzApi extends StatelessWidget {
         var meta = await _getMetadata();
         _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
-    
+      case '/account/security':
+        _changeState(
+          SecurityPageState(
+            login: await _controller!.runJavascriptReturningResult(
+              'document.getElementById(\'accountform-username\').value',
+            ),
+            email: EmailStatus(
+              email: await _controller!.runJavascriptReturningResult(
+                'document.getElementById(\'accountform-email\').value',
+              ),
+              confirmed: await _controller!.runJavascriptReturningResult(
+                      'var t = document.getElementsByClassName(\'hint-block\')[0].innerText; t == \'Підтверджено\' || t == \'Подтверждён\';') ==
+                  'true',
+            ),
+            phone: await _controller!.runJavascriptReturningResult(
+              'document.getElementById(\'accountform-phonenumber\').value',
+            ),
+          ),
+        );
+        break;
     }
 
     var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
