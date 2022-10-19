@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:nz_ua/nzsiteapi/nz_db.dart';
 
 part 'types.g.dart';
 
@@ -48,6 +51,166 @@ class ProfilePageState implements NzState {
   final SideMetadata? meta;
 }
 
+class ISQLObject<T> {
+  ISQLObject({
+    required this.schema,
+  });
+
+  Map<String, Type> schema;
+
+  String get TEXT => "TEXT";
+  String get DOUBLE => "DOUBLE";
+  String get SQL_OBJECT => "SQL_OBJECT";
+  String get INTEGER => "INTEGER";
+  String get BOOLEAN => "BOOLEAN";
+  String get DATETIME => "DATETIME";
+  String get LIST => "LIST";
+
+  get _fields => (_object as dynamic).toJson();
+  get _object => this as T;
+  get dbTableName => _object.runtimeType.toString();
+  bool isNullable() => null is T;
+
+  String getNameOfChildDB(String defTableName) {
+    return '${defTableName}_childdb';
+  }
+
+  Future<int> saveAsChild(String childOf) async {
+    var name = getNameOfChildDB(dbTableName);
+    if (!await tableIsExists(name)) {
+      createTable(schema, isChild: true, name: name);
+    }
+
+    await this.save(tableName: name);
+
+    var i = (await nzdb.rawQuery('SELECT last_insert_rowid();'))[0];
+
+    return int.parse(i['last_insert_rowid()'].toString());
+  }
+
+  Future save({String? tableName}) async {
+    var fields = _fields;
+
+    if (!await tableIsExists(dbTableName)) {
+      createTable(schema);
+    }
+
+    String getFields() {
+      var s = '';
+      schema.forEach((key, value) {
+        s += "$key, ";
+      });
+      s = s.substring(0, s.length - 2);
+      return s;
+    }
+
+    var query = 'INSERT INTO ${tableName ?? dbTableName} (${getFields()})\nVALUES (';
+    var kList = schema.keys.toList();
+    var vList = schema.values.toList();
+    for (var i = 0; i < schema.length; i++) {
+      var key = kList[i];
+      var value = vList[i];
+
+      var t = getFieldType(value);
+      var val = fields[key];
+      if (val == null) {
+        query += "NULL";
+      } else {
+        if (t != LIST && t != SQL_OBJECT) {
+          if (t == TEXT) {
+            query += "'${val.toString()}'";
+          } else if (t == DATETIME) {
+            query += "${(val as DateTime)}";
+          } else {
+            query += "$val";
+          }
+        } else {
+          if (t == SQL_OBJECT) {
+            ISQLObject sqlObject = val as ISQLObject;
+            var tableN = getNameOfChildDB(sqlObject.dbTableName);
+            var id = await sqlObject.saveAsChild(T.runtimeType.toString());
+            query += "'\$object_link\$=($id:$tableN)'";
+          } else {
+            //check if arr.length == 0
+            var from = 0;
+           var valList = val as List;
+            var tableN = getNameOfChildDB((valList[0] as ISQLObject).dbTableName);
+            for (var e in valList) {
+              ISQLObject sq = e as ISQLObject;
+              var id = await sq.saveAsChild(T.runtimeType.toString());
+              if (valList.indexOf(e) == 0) {
+                from = id;
+              }
+            }
+
+            query += "'\$arr_link\$=($tableN, $from:${from + valList.length - 1})'";
+          }
+        }
+      }
+
+      query += ", ";
+    }
+
+    query = query.substring(0, query.length - 2);
+
+    query += ')';
+
+    await nzdb.execute(query);
+  }
+
+  String? getFieldType(Type type) {
+    switch (type) {
+      case String:
+        return TEXT;
+      case int:
+        return INTEGER;
+      case double:
+        return DOUBLE;
+      case bool:
+        return BOOLEAN;
+      case DateTime:
+        return DATETIME;
+      case List:
+        return LIST;
+    }
+
+    return SQL_OBJECT;
+    // if field have type of object (SQL_OBJECT or LIST) - we should create separate table for this type of object
+    // and leave in current object only link to object in another table
+  }
+
+  Future createTable(Map<String, Type> object,
+      {bool isChild = false, String? name}) async {
+    var tableName = name ?? dbTableName;
+    String fields = "";
+    if (isChild) {
+      fields += "DB_ID INTEGER AUTO_INCREMENT,";
+    }
+    object.forEach((key, t) {
+      var type = getFieldType(t);
+      if (type != "LIST" && type != "SQL_OBJECT") {
+        fields += ' $key $type NULL,\n';
+      } else {
+        //here be a link for object in another table
+        fields += ' $key TEXT,\n';
+      }
+    });
+    fields = fields.substring(0, fields.length - 2);
+
+    var query = """CREATE TABLE IF NOT EXISTS $tableName(
+$fields
+    );""";
+    nzdb.execute(query);
+  }
+
+  Future<bool> tableIsExists(String name) async {
+    var r = await nzdb.rawQuery(
+        """SELECT name FROM sqlite_master WHERE type='table' AND name='$name';""");
+
+    return r.isNotEmpty;
+  }
+}
+
 /// /dashboard/news
 class NewsPageState implements NzState {
   NewsPageState({
@@ -81,7 +244,7 @@ class DiaryGridState implements NzState {
 
 /// /schedule/grades-statement?student_id={id}
 @JsonSerializable()
-class DiaryMarkGrid  {
+class DiaryMarkGrid {
   DiaryMarkGrid({
     required this.interval,
     required this.lines,
@@ -111,7 +274,10 @@ class DiaryMarkGridLine {
 }
 
 class SchedulePageState implements NzState {
-  SchedulePageState({required this.metadata, required this.content,});
+  SchedulePageState({
+    required this.metadata,
+    required this.content,
+  });
   final SchedulePageContent content;
   final SideMetadata? metadata;
 }
@@ -135,18 +301,23 @@ class SecurityPageState implements NzState {
     required this.login,
     required this.email,
     required this.phone,
+    required this.meta,
   });
   final String? login;
   final EmailStatus? email;
   final String? phone;
+  final SideMetadata? meta;
 }
 
 @JsonSerializable()
-class EmailStatus {
+class EmailStatus extends ISQLObject {
   EmailStatus({
     required this.email,
     required this.confirmed,
-  });
+  }) : super(schema: {
+          'email': String,
+          'confirmed': bool,
+        });
   final String? email;
   final bool? confirmed;
 
@@ -156,12 +327,12 @@ class EmailStatus {
 }
 
 @JsonSerializable()
-class ScheduleDay {
+class ScheduleDay extends ISQLObject {
   ScheduleDay({
     required this.today,
     required this.date,
     required this.lessons,
-  });
+  }) : super(schema: {'today': bool, 'date': String, 'lessons': List});
   final bool? today;
   final String? date;
   final List<ScheduleLesson?>? lessons;
@@ -172,12 +343,16 @@ class ScheduleDay {
 }
 
 @JsonSerializable()
-class ScheduleLesson {
+class ScheduleLesson extends ISQLObject {
   ScheduleLesson({
     required this.name,
     required this.teacher,
     required this.classAudience,
-  });
+  }) : super(schema: {
+          'name': String,
+          'teacher': UserProfileLink,
+          'classAudience': String,
+        });
   final String? name;
   final UserProfileLink? teacher;
   final String? classAudience;
@@ -285,6 +460,7 @@ class DiaryLine {
   final int? index;
 
   final DateTimeInterval lessonTime;
+
   /// it can be two or more lessons for one period
   final List<DiaryLineContent>? content;
 
@@ -516,11 +692,14 @@ class UserProfile {
 }
 
 @JsonSerializable()
-class UserProfileLink {
+class UserProfileLink extends ISQLObject {
   UserProfileLink({
     required this.fullName,
     required this.profileUrl,
-  });
+  }) : super(schema: {
+          'fullName': String,
+          'profileUrl': String,
+        });
   final String? fullName;
   final String? profileUrl;
 

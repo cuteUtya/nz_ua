@@ -18,6 +18,10 @@ class NzApi extends StatelessWidget {
   String? token;
   final BehaviorSubject<NzState> _state = BehaviorSubject();
   Stream<NzState> get state => _state.stream;
+
+  final BehaviorSubject<SideMetadata> _metadata = BehaviorSubject();
+  Stream<SideMetadata> get sideMetadata => _metadata.stream;
+
   late BuildContext _context;
 
   bool _inited = false;
@@ -66,6 +70,16 @@ class NzApi extends StatelessWidget {
   void _changeState(NzState state) {
     _state.add(state);
     currState = state;
+
+    switch(state.runtimeType){
+      case ProfilePageState:
+      case NewsPageState:
+      case DiaryPageState:
+      case DiaryGridState:
+      case SchedulePageState:
+      case SecurityPageState:
+      _metadata.add((state as dynamic).meta);
+    }
   }
 
   Future<SideMetadata> _getMetadata() async {
@@ -119,6 +133,7 @@ class NzApi extends StatelessWidget {
             phone: await _controller!.runJavascriptReturningResult(
               'document.getElementById(\'accountform-phonenumber\').value',
             ),
+            meta: await _getMetadata(),
           ),
         );
         break;
