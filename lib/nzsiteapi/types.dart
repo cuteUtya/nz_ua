@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -68,10 +69,14 @@ class ISQLObject<T> {
 
   get _fields => (_object as dynamic).toJson();
   get _object => this as T;
-  get dbTableName => _object.runtimeType.toString();
+  get dbTableName => ISQLObject.getNameOfDB(type: (this as T).runtimeType);
   bool isNullable() => null is T;
 
-  String getNameOfChildDB(String defTableName) {
+  static String getNameOfDB<T>({Type? type}) {
+    return type == null ? T.toString() : type.toString();
+  }
+
+  static String getNameOfChildDB(String defTableName) {
     return '${defTableName}_childdb';
   }
 
@@ -86,6 +91,76 @@ class ISQLObject<T> {
     var i = (await nzdb.rawQuery('SELECT last_insert_rowid();'))[0];
 
     return int.parse(i['last_insert_rowid()'].toString());
+  }
+
+  static Future<Map<String, dynamic>?> getByIdTableName(
+      int id, String tableName) async {
+    var query = 'SELECT * FROM $tableName WHERE DB_ID == $id';
+    var r = await nzdb.rawQuery(query);
+
+    var obj = await _deserializeSQLObject(r[0]!);
+
+    return obj;
+  }
+
+  static Future<Map<String, dynamic>?> getById<T>(int id,
+      {bool isChild = false}) async {
+    var name = ISQLObject.getNameOfDB<T>();
+    if (isChild) name = ISQLObject.getNameOfChildDB(name);
+
+    return getByIdTableName(id, name);
+  }
+
+  static Future<Map<String, dynamic>?> _deserializeSQLObject<T>(
+      Map<String, Object?> s) async {
+    Map<String, dynamic> jsonMap = {};
+
+    var objectRegex = RegExp(r'\$object_link\$=\((\d*)\:(.*)\)');
+    var arrayRegex = RegExp(r'\$arr_link\$=\((.*),(\d*):(\d*)\)');
+    var booleanRegex = RegExp(r'\$bool_value\$:(.*)');
+
+    var mKey = s.keys.toList();
+    var mValues = s.values.toList();
+
+    for (var j = 0; j < s.length; j++) {
+      var key = mKey[j];
+      var value = mValues[j];
+
+      var val;
+      if (value is String) {
+        if (objectRegex.hasMatch(value)) {
+          var regResult = objectRegex.firstMatch(value)!;
+          var i = int.parse(regResult.group(1)!);
+          var n = regResult.group(2)!;
+          val = await ISQLObject.getByIdTableName(i, n);
+          //this is object
+        } else if (arrayRegex.hasMatch(value)) {
+          List<dynamic> arr = [];
+
+          var regResult = arrayRegex.firstMatch(value)!;
+          var n = regResult.group(1)!;
+
+          if(n != "__empty__") {
+            var from = int.parse(regResult.group(2)!);
+            var to = int.parse(regResult.group(3)!);
+
+            for (var index = from; index <= to; index++) {
+              arr.add(await ISQLObject.getByIdTableName(index, n));
+            }
+          }
+          val = arr;
+        } else if (booleanRegex.hasMatch(value)) {
+          var l = booleanRegex.firstMatch(value)!.group(1)!;
+          val = l == "true" || l == "True";
+        }
+      }
+
+      val ??= value;
+
+      jsonMap[key] = val;
+    }
+
+    return jsonMap;
   }
 
   Future save({String? tableName}) async {
@@ -104,7 +179,8 @@ class ISQLObject<T> {
       return s;
     }
 
-    var query = 'INSERT INTO ${tableName ?? dbTableName} (${getFields()})\nVALUES (';
+    var query =
+        'INSERT INTO ${tableName ?? dbTableName} (${getFields()})\nVALUES (';
     var kList = schema.keys.toList();
     var vList = schema.values.toList();
     for (var i = 0; i < schema.length; i++) {
@@ -116,7 +192,7 @@ class ISQLObject<T> {
       if (val == null) {
         query += "NULL";
       } else {
-        if (t != LIST && t != SQL_OBJECT) {
+        if (t != LIST && t != SQL_OBJECT && t != BOOLEAN) {
           if (t == TEXT) {
             query += "'${val.toString()}'";
           } else if (t == DATETIME) {
@@ -130,20 +206,27 @@ class ISQLObject<T> {
             var tableN = getNameOfChildDB(sqlObject.dbTableName);
             var id = await sqlObject.saveAsChild(T.runtimeType.toString());
             query += "'\$object_link\$=($id:$tableN)'";
-          } else {
+          } else if (t == LIST) {
             //check if arr.length == 0
             var from = 0;
-           var valList = val as List;
-            var tableN = getNameOfChildDB((valList[0] as ISQLObject).dbTableName);
-            for (var e in valList) {
-              ISQLObject sq = e as ISQLObject;
-              var id = await sq.saveAsChild(T.runtimeType.toString());
-              if (valList.indexOf(e) == 0) {
-                from = id;
+            var valList = val as List;
+            if (valList.isEmpty) {
+              query += "'\$arr_link\$=(__empty__,0:0)'";
+            } else {
+              var tableN =
+                  getNameOfChildDB((valList[0] as ISQLObject).dbTableName);
+              for (var e in valList) {
+                ISQLObject sq = e as ISQLObject;
+                var id = await sq.saveAsChild(T.runtimeType.toString());
+                if (valList.indexOf(e) == 0) {
+                  from = id;
+                }
               }
+              query +=
+                  "'\$arr_link\$=($tableN,$from:${from + valList.length - 1})'";
             }
-
-            query += "'\$arr_link\$=($tableN, $from:${from + valList.length - 1})'";
+          } else if (t == BOOLEAN) {
+            query += "'\$bool_value\$:${val.toString()}'";
           }
         }
       }
@@ -183,12 +266,12 @@ class ISQLObject<T> {
       {bool isChild = false, String? name}) async {
     var tableName = name ?? dbTableName;
     String fields = "";
-    if (isChild) {
-      fields += "DB_ID INTEGER AUTO_INCREMENT,";
-    }
+    //if (isChild) {
+    fields += "DB_ID INTEGER PRIMARY KEY,";
+    //}
     object.forEach((key, t) {
       var type = getFieldType(t);
-      if (type != "LIST" && type != "SQL_OBJECT") {
+      if (type != LIST && type != SQL_OBJECT && type != BOOLEAN) {
         fields += ' $key $type NULL,\n';
       } else {
         //here be a link for object in another table
