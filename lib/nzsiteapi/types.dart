@@ -88,8 +88,11 @@ class ISQLObject<T> {
 
     await this.save(tableName: name);
 
-    var i = (await nzdb.rawQuery('SELECT last_insert_rowid();'))[0];
+    return await _getLastInsertRowID();
+  }
 
+  Future<int> _getLastInsertRowID() async {
+    var i = (await nzdb.rawQuery('SELECT last_insert_rowid();'))[0];
     return int.parse(i['last_insert_rowid()'].toString());
   }
 
@@ -163,7 +166,7 @@ class ISQLObject<T> {
     return jsonMap;
   }
 
-  Future save({String? tableName}) async {
+  Future<int> save({String? tableName}) async {
     var fields = _fields;
 
     if (!await tableIsExists(dbTableName)) {
@@ -239,6 +242,8 @@ class ISQLObject<T> {
     query += ')';
 
     await nzdb.execute(query);
+
+    return await _getLastInsertRowID();
   }
 
   String? getFieldType(Type type) {
