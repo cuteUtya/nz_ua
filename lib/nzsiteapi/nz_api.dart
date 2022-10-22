@@ -30,35 +30,41 @@ class NzApi extends StatelessWidget {
   @override
   build(BuildContext context) {
     _context = context;
-    return Opacity(
-      opacity: 1,
-      child: Visibility(
-        visible: true,
-        child: WebViewPlus(
-          initialUrl: '$baseUrl/menu',
-          onPageFinished: (c) {
-            _onUrlChange(c);
-            if (!_inited && _controller != null) {
-              _inited = true;
-              _loaded = true;
-              onLoad(this);
-            }
-          },
-          onWebViewCreated: (c) {
-            _controller = c.webViewController;
-            token = Prefs.getString('apiToken');
-            print(token);
-            if (!_inited && !_loaded) {
-              _inited = true;
-              _loaded = true;
-              onLoad(this);
-            }
-          },
-          onProgress: (progress) {},
-          javascriptMode: JavascriptMode.unrestricted,
-        ),
-      ),
+    return WebViewPlus(
+      onWebViewCreated: (c) {
+        print('created');
+        c.loadUrl('${baseUrl}/menu');
+
+        _controller = c.webViewController;
+        token = Prefs.getString('apiToken');
+        print('token = $token');
+        if (!_inited && !_loaded) {
+          _inited = true;
+          _loaded = true;
+          onLoad(this);
+        }
+      },
+      onPageFinished: (c) {
+        _onUrlChange(c);
+        if (!_inited && _controller != null) {
+          _inited = true;
+          _loaded = true;
+          onLoad(this);
+        }
+      },
+      javascriptMode: JavascriptMode.unrestricted,
     );
+    /*return WebViewPlus(
+      onPageFinished:
+      onWebViewCreated: (c) {
+        print('webview is created');
+
+      },
+      onProgress: (progress) {
+        print(progress);
+      },
+
+    );*/
   }
 
   /// loads specified URL, parse html and changes [_state]
@@ -71,14 +77,14 @@ class NzApi extends StatelessWidget {
     _state.add(state);
     currState = state;
 
-    switch(state.runtimeType){
+    switch (state.runtimeType) {
       case ProfilePageState:
       case NewsPageState:
       case DiaryPageState:
       case DiaryGridState:
       case SchedulePageState:
       case SecurityPageState:
-      _metadata.add((state as dynamic).meta);
+        _metadata.add((state as dynamic).meta);
     }
   }
 
@@ -95,7 +101,13 @@ class NzApi extends StatelessWidget {
       case '/login':
         var u = Prefs.getString('username');
         var p = Prefs.getString('password');
-        _changeState(NeedLoginState());
+        _changeState(
+          NeedLoginState.fromJson(
+            json.decode(
+              await _executeScript('getLoginPageState.js'),
+            ),
+          ),
+        );
         if (u != "" && p != "") {
           print('login');
           await login(u, p);
@@ -205,11 +217,13 @@ class NzApi extends StatelessWidget {
     return currState?.runtimeType == type;
   }
 
-  Future<void> login(String name, String password) async {
-    if (!_currentStateIs(NeedLoginState)) return;
+  Future<bool> login(String name, String password) async {
+    if (!_currentStateIs(NeedLoginState)) return true;
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
     await clickButton(ClassName('ms-button form-submit-btn'));
+
+    bool success = true;
 
     var dio = Dio();
     dio.options.contentType = "application/json";
@@ -224,8 +238,20 @@ class NzApi extends StatelessWidget {
       token = response.access_token;
       await Prefs.setString('apiToken', token);
     } catch (e) {
-      throw Exception('хз, якась залупа на сервері');
+      print(e);
+      success = false;
     }
+
+    return success;
+  }
+
+  Future sendRecoverCode(String email) async {
+    await setValue(Id('sendemailform-email'), email);
+    await clickButton(ClassName('btn-primary'));
+  }
+
+  void forgotPassword() {
+    _controller!.loadUrl('$baseUrl/account/forgot-password');
   }
 
   Future<ApiUserGetResponse?> _getAdditionalUserInfo(int id) async {

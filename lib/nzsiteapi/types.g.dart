@@ -6,6 +6,35 @@ part of 'types.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+NeedLoginState _$NeedLoginStateFromJson(Map<String, dynamic> json) =>
+    NeedLoginState(
+      alerts: (json['alerts'] as List<dynamic>)
+          .map((e) => PageAlert.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$NeedLoginStateToJson(NeedLoginState instance) =>
+    <String, dynamic>{
+      'alerts': instance.alerts,
+    };
+
+PageAlert _$PageAlertFromJson(Map<String, dynamic> json) => PageAlert(
+      text: json['text'] as String,
+      type: $enumDecode(_$AlertTypeEnumMap, json['type']),
+    );
+
+Map<String, dynamic> _$PageAlertToJson(PageAlert instance) => <String, dynamic>{
+      'type': _$AlertTypeEnumMap[instance.type]!,
+      'text': instance.text,
+    };
+
+const _$AlertTypeEnumMap = {
+  AlertType.success: 'success',
+  AlertType.info: 'info',
+  AlertType.warning: 'warning',
+  AlertType.danger: 'danger',
+};
+
 DiaryMarkGrid _$DiaryMarkGridFromJson(Map<String, dynamic> json) =>
     DiaryMarkGrid(
       interval: json['interval'] == null

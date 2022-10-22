@@ -32,7 +32,33 @@ class ClassName implements ElementIdentifier {
 
 abstract class NzState {}
 
-class NeedLoginState implements NzState {}
+@JsonSerializable()
+class NeedLoginState implements NzState {
+  const NeedLoginState({required this.alerts,});
+  final List<PageAlert> alerts;
+
+  factory NeedLoginState.fromJson(Map<String, dynamic> json) =>
+      _$NeedLoginStateFromJson(json);
+  Map<String, dynamic> toJson() => _$NeedLoginStateToJson(this);
+}
+
+@JsonSerializable()
+class PageAlert {
+  const PageAlert({required this.text, required this.type,});
+  final AlertType type;
+  final String text;
+
+  factory PageAlert.fromJson(Map<String, dynamic> json) =>
+      _$PageAlertFromJson(json);
+  Map<String, dynamic> toJson() => _$PageAlertToJson(this);
+}
+
+enum AlertType {
+  success,
+  info,
+  warning,
+  danger,
+}
 
 class NeedEmailState implements NzState {}
 
@@ -143,7 +169,7 @@ class ISQLObject<T> {
           var regResult = arrayRegex.firstMatch(value)!;
           var n = regResult.group(1)!;
 
-          if(n != "__empty__") {
+          if (n != "__empty__") {
             var from = int.parse(regResult.group(2)!);
             var to = int.parse(regResult.group(3)!);
 
@@ -298,6 +324,7 @@ $fields
     return r.isNotEmpty;
   }
 }
+
 
 /// /dashboard/news
 class NewsPageState implements NzState {
