@@ -31,6 +31,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   fonts:
+    - family: SpectrumIcons
+      fonts:
+        - asset: fonts/SpectrumIcons.ttf
     - family: Adobe Clean
       fonts:
         - asset: fonts/AdobeClean-Light.ttf
@@ -44,6 +47,7 @@ flutter:
     - family: Source Code Pro
       fonts:
         - asset: fonts/SourceCodePro-Medium.ttf
+
   assets:
     - Assets/
     - Assets/theme.tcss

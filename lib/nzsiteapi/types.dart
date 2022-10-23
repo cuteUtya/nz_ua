@@ -62,11 +62,10 @@ enum AlertType {
 
 class NeedEmailState implements NzState {}
 
-///
-class NeedCodeState implements NzState {}
-
 /// /menu
 class MainPageState implements NzState {}
+
+class StateLogined implements NzState {}
 
 /// /id{id}
 class ProfilePageState implements NzState {

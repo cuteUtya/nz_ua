@@ -13,7 +13,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "07b1e4e8c1676d07b9d33aca6d3b447842bc15ba"
+      resolved-ref: b388a0543f36cad376f73940d9ecbde1290bdfdb
       url: "https://github.com/cuteUtya/flutter-adobe-spectrum"
     source: git
     version: "1.0.0+1"

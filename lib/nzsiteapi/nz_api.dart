@@ -14,10 +14,15 @@ class NzApi extends StatelessWidget {
 
   Function(NzApi) onLoad;
   WebViewController? _controller;
-  NzState? currState;
+  NzState? currSiteState;
+  NzState? currLoginState;
   String? token;
-  final BehaviorSubject<NzState> _state = BehaviorSubject();
-  Stream<NzState> get state => _state.stream;
+
+  final BehaviorSubject<NzState> _loginState = BehaviorSubject();
+  Stream<NzState> get loginState => _loginState.stream;
+
+  final BehaviorSubject<NzState> _siteState = BehaviorSubject();
+  Stream<NzState> get siteState => _siteState.stream;
 
   final BehaviorSubject<SideMetadata> _metadata = BehaviorSubject();
   Stream<SideMetadata> get sideMetadata => _metadata.stream;
@@ -54,28 +59,34 @@ class NzApi extends StatelessWidget {
       },
       javascriptMode: JavascriptMode.unrestricted,
     );
-    /*return WebViewPlus(
-      onPageFinished:
-      onWebViewCreated: (c) {
-        print('webview is created');
-
-      },
-      onProgress: (progress) {
-        print(progress);
-      },
-
-    );*/
   }
 
-  /// loads specified URL, parse html and changes [_state]
+  /// loads specified URL, parse html and changes [_loginState]
   /// `url` - only url path
   Future<void> loadUrl(String url, {Map<String, String>? headers}) async {
     await _controller!.loadUrl("$baseUrl/$url", headers: headers);
   }
 
-  void _changeState(NzState state) {
-    _state.add(state);
-    currState = state;
+  void _changeLoginState(NzState state) {
+    switch (state.runtimeType) {
+      case NeedLoginState:
+      case NeedEmailState:
+        _loginState.add(state);
+        currLoginState = state;
+        break;
+      default:
+        if(currLoginState.runtimeType != StateLogined) {
+          currLoginState = StateLogined();
+          _loginState.add(currLoginState!);
+        }
+        break;
+    }
+  }
+
+  void _changeSiteState(NzState state) {
+    _siteState.add(state);
+    _changeLoginState(state);
+    currSiteState = state;
 
     switch (state.runtimeType) {
       case ProfilePageState:
@@ -101,7 +112,7 @@ class NzApi extends StatelessWidget {
       case '/login':
         var u = Prefs.getString('username');
         var p = Prefs.getString('password');
-        _changeState(
+        _changeSiteState(
           NeedLoginState.fromJson(
             json.decode(
               await _executeScript('getLoginPageState.js'),
@@ -115,10 +126,10 @@ class NzApi extends StatelessWidget {
         break;
       case '/menu':
         //we already login
-        _changeState(MainPageState());
+        _changeSiteState(MainPageState());
         break;
       case '/account/forgot-password':
-        _changeState(NeedEmailState());
+        _changeSiteState(NeedEmailState());
         break;
       case '/dashboard/news':
         var tabs =
@@ -126,10 +137,10 @@ class NzApi extends StatelessWidget {
         var news =
             NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
         var meta = await _getMetadata();
-        _changeState(NewsPageState(tabs: tabs, news: news, meta: meta));
+        _changeSiteState(NewsPageState(tabs: tabs, news: news, meta: meta));
         break;
       case '/account/security':
-        _changeState(
+        _changeSiteState(
           SecurityPageState(
             login: await _controller!.runJavascriptReturningResult(
               'document.getElementById(\'accountform-username\').value',
@@ -162,12 +173,12 @@ class NzApi extends StatelessWidget {
             ),
           ),
           meta: meta);
-      _changeState(v);
+      _changeSiteState(v);
     }
 
     var diaryRegex = RegExp('\/school.*\/schedule.*\/diary');
     if (diaryRegex.hasMatch(url)) {
-      _changeState(
+      _changeSiteState(
         DiaryPageState(
           content: DiaryContentTopToDown.fromJson(
             json.decode(
@@ -181,7 +192,7 @@ class NzApi extends StatelessWidget {
 
     var diaryGridRegex = RegExp('\/schedule\/grades-statement');
     if (diaryGridRegex.hasMatch(url)) {
-      _changeState(
+      _changeSiteState(
         DiaryGridState(
           content: DiaryMarkGrid.fromJson(
             json.decode(await _executeScript('getDiaryGridTable.js')),
@@ -193,7 +204,7 @@ class NzApi extends StatelessWidget {
 
     var scheduleRegex = RegExp('school.*\/schedule');
     if (scheduleRegex.hasMatch(url)) {
-      _changeState(
+      _changeSiteState(
         SchedulePageState(
           content: SchedulePageContent.fromJson(
             json.decode(
@@ -214,7 +225,7 @@ class NzApi extends StatelessWidget {
   }
 
   bool _currentStateIs(Type type) {
-    return currState?.runtimeType == type;
+    return currSiteState?.runtimeType == type;
   }
 
   Future<bool> login(String name, String password) async {
