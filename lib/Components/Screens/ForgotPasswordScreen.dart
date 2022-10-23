@@ -26,42 +26,48 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     var design = Desing.of(context);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: design.layout.spacing500.bottom,
-          child: Text.rich(
-            TextSpan(
-              children: [
-                design.typography.text(
-                  'Forgot password',
-                  size: design.typography.fontSize300.value,
-                  semantic: TextSemantic.heading,
-                ),
-              ],
+    return Container(
+      padding: design.layout.spacing600.horizontal,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: design.layout.spacing500.bottom,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  design.typography.text(
+                    'Forgot password',
+                    size: design.typography.fontSize300.value,
+                    semantic: TextSemantic.heading,
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
-        ),
-        Padding(
-          padding: design.layout.spacing300.bottom,
-          child: AdobeTextField(
-            label: 'Email (required)',
-            onChange: (c) => email = c,
-            inputType: InputFieldType.email,
+          Padding(
+            padding: design.layout.spacing300.bottom,
+            child: AdobeTextField(
+              label: 'Email (required)',
+              onChange: (c) => email = c,
+              inputType: InputFieldType.email,
+            ),
           ),
-        ),
-        AdobeButton(
-          label: 'Send',
-          isPending: pending,
-          onClick: () {
-            setState(() => pending = true);
-            widget.nzApi.sendRecoverCode(email);
-          },
-        )
-      ],
+          AdobeButton(
+            label: 'Send',
+            isPending: pending,
+            onClick: () {
+              setState(() => pending = true);
+              widget.nzApi.sendRecoverCode(email);
+            },
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).viewInsets.bottom,
+          )
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:adobe_spectrum/spectrum_desing.dart';
 import 'package:flutter/material.dart';
+import 'package:nz_ua/Components/Screens/AppMain.dart';
 import 'package:nz_ua/Components/Screens/ForgotPasswordScreen.dart';
 import 'package:nz_ua/Components/Screens/SignIn.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
@@ -64,13 +65,12 @@ class MyAppState extends State {
 
     var design = Desing.of(context);
 
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: [
-        Container(
-          color: design.colors.gray.shade100,
-          padding: design.layout.spacing600.horizontal,
-          child: StreamBuilder(
+    return Container(
+      color: design.colors.gray.shade100,
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          StreamBuilder(
             builder: (_, value) {
               var state = value.data;
               switch (state.runtimeType) {
@@ -83,25 +83,30 @@ class MyAppState extends State {
                   return ForgotPasswordScreen(
                     nzApi: nzapi,
                   );
+                case StateLogined:
+                  return AppMain(
+                    api: nzapi,
+                  );
+                  break;
               }
-              return Container(); //const SignInScreen();
+              return Container();
             },
-            stream: nzapi.state,
+            stream: nzapi.loginState,
           ),
-        ),
-        Opacity(
-          opacity: 0.33,
-          child: SizedBox(
-            width: 200,
-            height: 200,
-            child: Visibility(
-              visible: true,
-              //visible: false,
-              child: nzapi,
-            ),
+          Opacity(
+            opacity: 0.3,
+            child: AbsorbPointer(child:  SizedBox(
+              width: 1,
+              height: 1,
+              child: Visibility(
+                visible: true,
+                //visible: false,
+                child: nzapi,
+              ),
+            ),),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
