@@ -49,6 +49,7 @@ class _InformationTableState extends State<InformationTable> {
                   widget.title,
                   size: design.typography.fontSize100.value,
                   semantic: TextSemantic.heading,
+                  color: Colors.white
                 ),
               )
             ],

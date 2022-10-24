@@ -11,7 +11,6 @@ import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:adobe_spectrum/Components/Divider.dart' as adobe;
 
 import '../../nzsiteapi/types.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppMain extends StatefulWidget {
   const AppMain({
