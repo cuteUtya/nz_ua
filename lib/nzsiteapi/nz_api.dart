@@ -83,6 +83,10 @@ class NzApi extends StatelessWidget {
     }
   }
 
+  void forceUpdateMetadata() {
+    _controller!.loadUrl('$baseUrl/dashboard/news');
+  }
+  
   void _changeSiteState(NzState state) {
     _siteState.add(state);
     _changeLoginState(state);
@@ -96,6 +100,7 @@ class NzApi extends StatelessWidget {
       case SchedulePageState:
       case SecurityPageState:
         _metadata.add((state as dynamic).meta);
+      break;
     }
   }
 
