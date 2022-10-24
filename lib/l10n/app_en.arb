@@ -1,0 +1,20 @@
+{
+    "signIn": "Sign in",
+    "username_required": "Username (required)",
+    "password_required": "Password (required)",
+    "forgot_password": "Forgot password?",
+    "login": "Login",
+    "forgot_pass_title": "Forgot password",
+    "email_required": "Email (required)",
+    "send_code": "Send code",
+    "home": "Home",
+    "diary": "Diary",
+    "profile": "Profile",
+    "news": "News",
+    "settings": "Settings",
+    "status_main": "Status",
+    "tomorrow_homework": "Tomorrow's homework",
+    "latest_mark": "Latest mark",
+    "coming_birthdays": "Coming birthdays",
+    "no_homework_tomorrow": "No homework for tomorrow"
+}

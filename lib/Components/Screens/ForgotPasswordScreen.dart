@@ -3,8 +3,10 @@ import 'package:adobe_spectrum/Components/text_field.dart';
 import 'package:design_system_provider/desing_provider.dart';
 import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({
@@ -38,7 +40,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               TextSpan(
                 children: [
                   design.typography.text(
-                    'Forgot password',
+                    appLocalization.forgot_password,
                     size: design.typography.fontSize300.value,
                     semantic: TextSemantic.heading,
                   ),
@@ -50,13 +52,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Padding(
             padding: design.layout.spacing300.bottom,
             child: AdobeTextField(
-              label: 'Email (required)',
+              label: appLocalization.email_required,
               onChange: (c) => email = c,
               inputType: InputFieldType.email,
             ),
           ),
           AdobeButton(
-            label: 'Send',
+            label: appLocalization.send_code,
             isPending: pending,
             onClick: () {
               setState(() => pending = true);

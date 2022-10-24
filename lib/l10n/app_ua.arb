@@ -1,0 +1,21 @@
+{
+    "@@locale": "uk",
+    "signIn": "Вхід",
+    "username_required": "Логін (обов'язково)",
+    "password_required": "Пароль (обов'язково)",
+    "forgot_password": "Забули пароль?",
+    "login": "Увійти",
+    "forgot_pass_title": "Забув пароль",
+    "email_required": "Електронна пошта (обов'язково)",
+    "send_code": "Надіслати код",
+    "home": "Головна",
+    "diary": "Розклад",
+    "profile": "Профіль",
+    "news": "Новини",
+    "settings": "Параметри",
+    "status_main": "Статус",
+    "tomorrow_homework": "Завтрішня домашня робота",
+    "latest_mark": "Оставнні оцінки",
+    "coming_birthdays": "Найближчі дні народження",
+    "no_homework_tomorrow": "На завтра немає домашньої роботи"
+}

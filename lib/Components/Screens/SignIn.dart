@@ -4,8 +4,10 @@ import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adobe_spectrum/Components/button.dart';
+import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({
@@ -42,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
               TextSpan(
                 children: [
                   design.typography.text(
-                    'Sign in ($success)',
+                    appLocalization.signIn,
                     size: design.typography.fontSize300.value,
                     semantic: TextSemantic.heading,
                   ),
@@ -54,14 +56,14 @@ class _SignInScreenState extends State<SignInScreen> {
           Padding(
             padding: design.layout.spacing400.bottom,
             child: AdobeTextField(
-              label: 'Username (required)',
+              label: appLocalization.username_required,
               onChange: (s) => username = s,
             ),
           ),
           Padding(
             padding: design.layout.spacing75.bottom,
             child: AdobeTextField(
-              label: 'Password (required)',
+              label: appLocalization.password_required,
               onChange: (s) => password = s,
               inputType: InputFieldType.password,
             ),
@@ -73,7 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
               children: [
                 GestureDetector(
                   child: Text(
-                    'Forgot password?',
+                    appLocalization.forgot_password,
                     style: TextStyle(
                       fontSize: design.typography.fontSize50.value,
                       color: design.colors.gray.shade700,
@@ -86,7 +88,7 @@ class _SignInScreenState extends State<SignInScreen> {
           ),
           //todo: load state after click
           AdobeButton(
-            label: 'Login (pending = $pending)',
+            label: appLocalization.login,
             isPending: pending,
             onClick: () async {
               setState(() => pending = true);

@@ -5,11 +5,13 @@ import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/MarkDisplay.dart';
+import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:adobe_spectrum/Components/Divider.dart' as adobe;
 
 import '../../nzsiteapi/types.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppMain extends StatefulWidget {
   const AppMain({
@@ -47,6 +49,7 @@ class _AppMainState extends State<AppMain> {
     }
 
     Widget buildBirthdayLine(Birthday bday) {
+      //todo open profile onClick
       return Padding(
         padding: design.layout.spacing100.all,
         child: Text.rich(
@@ -70,49 +73,71 @@ class _AppMainState extends State<AppMain> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child:
-        ListView(
-          padding: design.layout.spacing300.vertical,
-          children: [
-            Padding(
-              padding: design.layout.spacing300.horizontal,
-              child: StreamBuilder(
-                stream: widget.api.sideMetadata,
-                builder: (_, data) {
-                  if (data.data == null) {
-                    widget.api.forceUpdateMetadata();
-                    return Container();
-                  }
-                  var metadata = data.data!;
-                  var padding = Padding(
-                    padding: design.layout.spacing300.top,
-                    child: Container(),
-                  );
-                  return Column(
-                    children: [
-                      InformationTable(
-                        title: 'Latest marks',
-                         content: (metadata.latestMarks ?? [])
-                            .map((e) => [buildMarkLine(e)])
-                            .toList(),
-                        topBarColor: design.colors.blue.shade600,
-                      ),
-                      padding,
-                      InformationTable(
-                        title: 'Coming birtdays',
-                        itemsAlign: Alignment.centerLeft,
-                        topBarColor: design.colors.magenta.shade600,
-                        content: (metadata.closestBirthdays ?? [])
-                            .map((e) => [buildBirthdayLine(e)])
-                            .toList(),
-                      )
-                    ],
-                  );
-                },
+        Expanded(
+          child: ListView(
+            padding: design.layout.spacing300.vertical,
+            children: [
+              Padding(
+                padding: design.layout.spacing300.horizontal,
+                child: StreamBuilder(
+                  stream: widget.api.sideMetadata,
+                  builder: (_, data) {
+                    if (data.data == null) {
+                      widget.api.forceUpdateMetadata();
+                      return Container();
+                    }
+                    var metadata = data.data!;
+                    var padding = Padding(
+                      padding: design.layout.spacing300.top,
+                      child: Container(),
+                    );
+                    return Column(
+                      children: [
+                        InformationTable(
+                          title: appLocalization.tomorrow_homework,
+                          content: (metadata.comingHomework?.length ?? 0) == 0
+                              ? [
+                                  [
+                                    Padding(
+                                      padding: design.layout.spacing200.all,
+                                      child: Text.rich(
+                                        design.typography.text(
+                                          appLocalization.no_homework_tomorrow,
+                                          size: design
+                                              .typography.fontSize100.value,
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                                ]
+                              : [],
+                          topBarColor: design.colors.green.shade600,
+                        ),
+                        padding,
+                        InformationTable(
+                          title: appLocalization.latest_mark,
+                          content: (metadata.latestMarks ?? [])
+                              .map((e) => [buildMarkLine(e)])
+                              .toList(),
+                          topBarColor: design.colors.blue.shade600,
+                        ),
+                        padding,
+                        InformationTable(
+                          title: appLocalization.coming_birthdays,
+                          itemsAlign: Alignment.centerLeft,
+                          topBarColor: design.colors.magenta.shade600,
+                          content: (metadata.closestBirthdays ?? [])
+                              .map((e) => [buildBirthdayLine(e)])
+                              .toList(),
+                        )
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),),
+            ],
+          ),
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -122,25 +147,25 @@ class _AppMainState extends State<AppMain> {
                 dividerSize: DividerSize.medium,
               ),
             ),
-            const NavigationBarAndroid(usePrimaryBackground: false, items: [
+            NavigationBarAndroid(usePrimaryBackground: false, items: [
               NavigationBarItem(
-                name: 'Home',
+                name: appLocalization.home,
                 icon: SpectrumIcons.smock_home,
               ),
               NavigationBarItem(
-                name: 'Diary',
+                name: appLocalization.diary,
                 icon: SpectrumIcons.smock_calendar,
               ),
               NavigationBarItem(
-                name: 'Profile',
+                name: appLocalization.profile,
                 icon: SpectrumIcons.smock_user,
               ),
               NavigationBarItem(
-                name: 'News',
+                name: appLocalization.news,
                 icon: SpectrumIcons.smock_news,
               ),
               NavigationBarItem(
-                name: 'Settings',
+                name: appLocalization.settings,
                 icon: SpectrumIcons.smock_settings,
               ),
             ])

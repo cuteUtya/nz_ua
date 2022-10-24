@@ -5,28 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:nz_ua/Components/Screens/AppMain.dart';
 import 'package:nz_ua/Components/Screens/ForgotPasswordScreen.dart';
 import 'package:nz_ua/Components/Screens/SignIn.dart';
+import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/nz_db.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
-import 'package:nz_ua/theme.dart';
 import 'package:prefs/prefs.dart';
 import 'package:design_system_provider/desing_provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ClientTheme.init();
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Material(
         child: Desing(
           desingSystem: Spectrum(theme: SpectrumTheme.dark),
-          child: ColoredBox(
-            color: NTheme.field('base.back'),
-            child: FutureBuilder(
-              builder: (_, __) => const MyApp(),
-              future: NzDB().load(),
-            ),
+          child: FutureBuilder(
+            builder: (_, __) => const MyApp(),
+            future: NzDB().load(),
           ),
         ),
       ),
@@ -63,6 +66,8 @@ class MyAppState extends State {
       onLoad: (api) {},
     );
 
+    appLocalization = AppLocalizations.of(context)!;
+
     var design = Desing.of(context);
 
     return Container(
@@ -73,30 +78,31 @@ class MyAppState extends State {
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
-           StreamBuilder(
-              builder: (_, value) {
-                var state = value.data;
-                switch (state.runtimeType) {
-                  case NeedLoginState:
-                    return SignInScreen(
-                      state: state as NeedLoginState,
+          StreamBuilder(
+            builder: (_, value) {
+              var state = value.data;
+              switch (state.runtimeType) {
+                case NeedLoginState:
+                  return SignInScreen(
+                    state: state as NeedLoginState,
+                    api: nzapi,
+                  );
+                case NeedEmailState:
+                  return ForgotPasswordScreen(
+                    nzApi: nzapi,
+                  );
+                case StateLogined:
+                  return MaterialApp(
+                    home: AppMain(
                       api: nzapi,
-                    );
-                  case NeedEmailState:
-                    return ForgotPasswordScreen(
-                      nzApi: nzapi,
-                    );
-                  case StateLogined:
-                    return AppMain(
-                      api: nzapi,
-                    );
-                    break;
-                }
-                return Container();
-              },
-              stream: nzapi.loginState,
-            ),
-
+                    ),
+                  );
+                  break;
+              }
+              return Container();
+            },
+            stream: nzapi.loginState,
+          ),
           Opacity(
             opacity: 0.3,
             child: AbsorbPointer(
