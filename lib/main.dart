@@ -67,43 +67,49 @@ class MyAppState extends State {
 
     return Container(
       color: design.colors.gray.shade100,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).viewPadding.top,
+      ),
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
-          StreamBuilder(
-            builder: (_, value) {
-              var state = value.data;
-              switch (state.runtimeType) {
-                case NeedLoginState:
-                  return SignInScreen(
-                    state: state as NeedLoginState,
-                    api: nzapi,
-                  );
-                case NeedEmailState:
-                  return ForgotPasswordScreen(
-                    nzApi: nzapi,
-                  );
-                case StateLogined:
-                  return AppMain(
-                    api: nzapi,
-                  );
-                  break;
-              }
-              return Container();
-            },
-            stream: nzapi.loginState,
-          ),
+           StreamBuilder(
+              builder: (_, value) {
+                var state = value.data;
+                switch (state.runtimeType) {
+                  case NeedLoginState:
+                    return SignInScreen(
+                      state: state as NeedLoginState,
+                      api: nzapi,
+                    );
+                  case NeedEmailState:
+                    return ForgotPasswordScreen(
+                      nzApi: nzapi,
+                    );
+                  case StateLogined:
+                    return AppMain(
+                      api: nzapi,
+                    );
+                    break;
+                }
+                return Container();
+              },
+              stream: nzapi.loginState,
+            ),
+
           Opacity(
             opacity: 0.3,
-            child: AbsorbPointer(child:  SizedBox(
-              width: 1,
-              height: 1,
-              child: Visibility(
-                visible: true,
-                //visible: false,
-                child: nzapi,
+            child: AbsorbPointer(
+              child: SizedBox(
+                width: 1,
+                height: 1,
+                child: Visibility(
+                  visible: true,
+                  //visible: false,
+                  child: nzapi,
+                ),
               ),
-            ),),
+            ),
           ),
         ],
       ),
