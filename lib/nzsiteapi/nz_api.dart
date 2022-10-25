@@ -14,7 +14,7 @@ class NzApi extends StatelessWidget {
   NzApi({Key? key, required this.onLoad}) : super(key: key);
 
   Function(NzApi) onLoad;
-  WebViewController? _controller;
+  static WebViewController? _controller;
   NzState? currSiteState;
   NzState? currLoginState;
   String? token;
@@ -59,7 +59,7 @@ class NzApi extends StatelessWidget {
             print('created');
             c.loadUrl('${baseUrl}/menu');
 
-            _controller = c.webViewController;
+            _controller ??= c.webViewController;
             token = Prefs.getString('apiToken');
             print('token = $token');
             if (!_inited && !_loaded) {
@@ -262,12 +262,7 @@ class NzApi extends StatelessWidget {
     return i.toString();
   }
 
-  bool _currentStateIs(Type type) {
-    return currSiteState?.runtimeType == type;
-  }
-
   Future<bool> login(String name, String password) async {
-    if (!_currentStateIs(NeedLoginState)) return true;
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
     await clickButton(ClassName('ms-button form-submit-btn'));
