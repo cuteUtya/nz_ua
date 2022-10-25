@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:nz_ua/nzsiteapi/types.dart';
+import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
 
 class DatabaseLoaderWrapper<T> extends StatelessWidget {
   const DatabaseLoaderWrapper({

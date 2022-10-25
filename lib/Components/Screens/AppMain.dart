@@ -5,6 +5,7 @@ import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/MarkDisplay.dart';
+import 'package:nz_ua/Components/Screens/AppPages/DiaryPage.dart';
 import 'package:nz_ua/Components/Screens/AppPages/Homepage.dart';
 import 'package:nz_ua/Components/db_loader_wrapper.dart';
 import 'package:nz_ua/Components/localization.dart';
@@ -71,6 +72,8 @@ class _AppMainState extends State<AppMain> {
 
     if (state == HOME) {
       page = Homepage(api: widget.api);
+    } else if(state == DIARY) {
+      page = DiaryPage(api: widget.api);
     }
 
     return Column(
