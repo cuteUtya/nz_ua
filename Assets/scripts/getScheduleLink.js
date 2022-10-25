@@ -1,0 +1,1 @@
+document.getElementsByClassName('magazines-menu')[0].children[0].href

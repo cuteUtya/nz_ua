@@ -28,6 +28,9 @@ class NzApi extends StatelessWidget {
   final BehaviorSubject<SideMetadata> _metadata = BehaviorSubject();
   Stream<SideMetadata> get sideMetadata => _metadata.stream;
 
+  final BehaviorSubject<DiaryContentTopToDown> _diaryContentTopDown = BehaviorSubject();
+  Stream<DiaryContentTopToDown> get diaryContentTopDown => _diaryContentTopDown.stream;
+
   late BuildContext _context;
 
   bool _inited = false;
@@ -108,6 +111,11 @@ class NzApi extends StatelessWidget {
     }
   }
 
+  void forceUpdateDiary() async {
+    var url = await _executeScript('getScheduleLink.js');
+    _controller!.loadUrl(url.replaceAll('\"', ''));
+  }
+
   void forceUpdateMetadata() {
     _controller!.loadUrl('$baseUrl/dashboard/news');
   }
@@ -117,6 +125,14 @@ class NzApi extends StatelessWidget {
     _changeLoginState(state);
     currSiteState = state;
 
+    switch(state.runtimeType) {
+      case DiaryPageState:
+        var c = (state as DiaryPageState).content;
+        if(c != null) _diaryContentTopDown.add(c);
+        break;
+    }
+
+    //meta
     switch (state.runtimeType) {
       case ProfilePageState:
       case NewsPageState:
@@ -243,13 +259,13 @@ class NzApi extends StatelessWidget {
     var scheduleRegex = RegExp('school.*\/schedule');
     if (scheduleRegex.hasMatch(url)) {
       _changeSiteState(
-        SchedulePageState(
-          content: SchedulePageContent.fromJson(
+        DiaryPageState(
+          content: DiaryContentTopToDown.fromJson(
             json.decode(
-              await _executeScript('getSchedule.js'),
+              await _executeScript('getDiary.js'),
             ),
           ),
-          metadata: await _getMetadata(),
+          meta: await _getMetadata(),
         ),
       );
     }
