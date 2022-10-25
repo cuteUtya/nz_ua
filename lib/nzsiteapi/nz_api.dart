@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:prefs/prefs.dart';
@@ -32,33 +33,57 @@ class NzApi extends StatelessWidget {
   bool _inited = false;
   bool _loaded = false;
 
+  bool _hasInternet = false;
+
   @override
   build(BuildContext context) {
     _context = context;
-    return WebViewPlus(
-      onWebViewCreated: (c) {
-        print('created');
-        c.loadUrl('${baseUrl}/menu');
+    return FutureBuilder(
+      future: (Connectivity().checkConnectivity()),
+      builder: (_, d) {
+        if (d.hasData) {
+          _hasInternet = d.data != ConnectivityResult.none;
+          Connectivity().onConnectivityChanged.listen((event) {
+            bool n = event != ConnectivityResult.none;
 
-        _controller = c.webViewController;
-        token = Prefs.getString('apiToken');
-        print('token = $token');
-        if (!_inited && !_loaded) {
-          _inited = true;
-          _loaded = true;
-          onLoad(this);
+            if (n != _hasInternet) {
+              _hasInternet = n;
+              if (_hasInternet) {
+                _onInternetReturn();
+              }
+            }
+          });
         }
+        return WebViewPlus(
+          onWebViewCreated: (c) {
+            print('created');
+            c.loadUrl('${baseUrl}/menu');
+
+            _controller = c.webViewController;
+            token = Prefs.getString('apiToken');
+            print('token = $token');
+            if (!_inited && !_loaded) {
+              _inited = true;
+              _loaded = true;
+              onLoad(this);
+            }
+          },
+          onPageFinished: (c) {
+            _onUrlChange(c);
+            if (!_inited && _controller != null) {
+              _inited = true;
+              _loaded = true;
+              onLoad(this);
+            }
+          },
+          javascriptMode: JavascriptMode.unrestricted,
+        );
       },
-      onPageFinished: (c) {
-        _onUrlChange(c);
-        if (!_inited && _controller != null) {
-          _inited = true;
-          _loaded = true;
-          onLoad(this);
-        }
-      },
-      javascriptMode: JavascriptMode.unrestricted,
     );
+  }
+
+  void _onInternetReturn() {
+    _controller?.reload();
   }
 
   /// loads specified URL, parse html and changes [_loginState]
@@ -75,7 +100,7 @@ class NzApi extends StatelessWidget {
         currLoginState = state;
         break;
       default:
-        if(currLoginState.runtimeType != StateLogined) {
+        if (currLoginState.runtimeType != StateLogined) {
           currLoginState = StateLogined();
           _loginState.add(currLoginState!);
         }
@@ -86,7 +111,7 @@ class NzApi extends StatelessWidget {
   void forceUpdateMetadata() {
     _controller!.loadUrl('$baseUrl/dashboard/news');
   }
-  
+
   void _changeSiteState(NzState state) {
     _siteState.add(state);
     _changeLoginState(state);
@@ -100,9 +125,11 @@ class NzApi extends StatelessWidget {
       case SchedulePageState:
       case SecurityPageState:
         _metadata.add((state as dynamic).meta);
-      break;
+        break;
     }
   }
+
+  bool hasInternetConnection() => _hasInternet;
 
   Future<SideMetadata> _getMetadata() async {
     return SideMetadata.fromJson(
@@ -137,35 +164,41 @@ class NzApi extends StatelessWidget {
         _changeSiteState(NeedEmailState());
         break;
       case '/dashboard/news':
-        var tabs =
-            TabSet.fromJson(json.decode(await _executeScript('getTabs.js')));
-        var news =
-            NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
-        var meta = await _getMetadata();
-        _changeSiteState(NewsPageState(tabs: tabs, news: news, meta: meta));
+        if (_hasInternet) {
+          var tabs =
+              TabSet.fromJson(json.decode(await _executeScript('getTabs.js')));
+          var news =
+              NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
+          var meta = await _getMetadata();
+          _changeSiteState(NewsPageState(tabs: tabs, news: news, meta: meta));
+        }
         break;
       case '/account/security':
-        _changeSiteState(
-          SecurityPageState(
-            login: await _controller!.runJavascriptReturningResult(
-              'document.getElementById(\'accountform-username\').value',
-            ),
-            email: EmailStatus(
-              email: await _controller!.runJavascriptReturningResult(
-                'document.getElementById(\'accountform-email\').value',
+        if (_hasInternet) {
+          _changeSiteState(
+            SecurityPageState(
+              login: await _controller!.runJavascriptReturningResult(
+                'document.getElementById(\'accountform-username\').value',
               ),
-              confirmed: await _controller!.runJavascriptReturningResult(
-                      'var t = document.getElementsByClassName(\'hint-block\')[0].innerText; t == \'Підтверджено\' || t == \'Подтверждён\';') ==
-                  'true',
+              email: EmailStatus(
+                email: await _controller!.runJavascriptReturningResult(
+                  'document.getElementById(\'accountform-email\').value',
+                ),
+                confirmed: await _controller!.runJavascriptReturningResult(
+                        'var t = document.getElementsByClassName(\'hint-block\')[0].innerText; t == \'Підтверджено\' || t == \'Подтверждён\';') ==
+                    'true',
+              ),
+              phone: await _controller!.runJavascriptReturningResult(
+                'document.getElementById(\'accountform-phonenumber\').value',
+              ),
+              meta: await _getMetadata(),
             ),
-            phone: await _controller!.runJavascriptReturningResult(
-              'document.getElementById(\'accountform-phonenumber\').value',
-            ),
-            meta: await _getMetadata(),
-          ),
-        );
+          );
+        }
         break;
     }
+
+    if (!_hasInternet) return;
 
     var userProfileRegex = RegExp('$baseUrl\/id(.{0,})');
     if (userProfileRegex.hasMatch(url)) {

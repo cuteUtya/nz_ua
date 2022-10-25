@@ -5,6 +5,7 @@ import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/MarkDisplay.dart';
+import 'package:nz_ua/Components/db_loader_wrapper.dart';
 import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
@@ -69,6 +70,8 @@ class _AppMainState extends State<AppMain> {
       );
     }
 
+    //todo show error that no internet
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -78,60 +81,80 @@ class _AppMainState extends State<AppMain> {
             children: [
               Padding(
                 padding: design.layout.spacing300.horizontal,
-                child: StreamBuilder(
-                  stream: widget.api.sideMetadata,
-                  builder: (_, data) {
-                    if (data.data == null) {
-                      widget.api.forceUpdateMetadata();
-                      return Container();
-                    }
-                    var metadata = data.data!;
-                    var padding = Padding(
-                      padding: design.layout.spacing300.top,
-                      child: Container(),
-                    );
-                    return Column(
-                      children: [
-                        InformationTable(
-                          title: appLocalization.tomorrow_homework,
-                          content: (metadata.comingHomework?.length ?? 0) == 0
-                              ? [
-                                  [
-                                    Padding(
-                                      padding: design.layout.spacing200.all,
-                                      child: Text.rich(
-                                        design.typography.text(
-                                          appLocalization.no_homework_tomorrow,
-                                          size: design
-                                              .typography.fontSize100.value,
+                child: DatabaseLoaderWrapper<SideMetadata>(
+                  parseCallback: SideMetadata.fromJson,
+                  id: 1,
+                  onBuild: (value) => StreamBuilder(
+                    stream: widget.api.sideMetadata,
+                    builder: (_, data) {
+                      SideMetadata? metadata = data.data ?? (value as SideMetadata?);
+
+                      if (data.data == null) {
+                        widget.api.forceUpdateMetadata();
+                      }
+
+                      if(metadata == null) {
+                        return Container();
+                      }
+
+                      print('have metadata value ${metadata.toJson()}');
+
+                      //save new value to db
+                      if(data.data != null) {
+                        metadata.deleteAllValues().then(
+                              (value) =>
+                              metadata.save().then((v) =>
+                                  print('SAVE VALUE WITH INDEX $v')),
+                        );
+                      }
+                      var padding = Padding(
+                        padding: design.layout.spacing300.top,
+                        child: Container(),
+                      );
+                      return Column(
+                        children: [
+                          InformationTable(
+                            title: appLocalization.tomorrow_homework,
+                            content: (metadata.comingHomework?.length ?? 0) == 0
+                                ? [
+                                    [
+                                      Padding(
+                                        padding: design.layout.spacing200.all,
+                                        child: Text.rich(
+                                          design.typography.text(
+                                            appLocalization
+                                                .no_homework_tomorrow,
+                                            size: design
+                                                .typography.fontSize100.value,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    ]
                                   ]
-                                ]
-                              : [],
-                          topBarColor: design.colors.green.shade600,
-                        ),
-                        padding,
-                        InformationTable(
-                          title: appLocalization.latest_mark,
-                          content: (metadata.latestMarks ?? [])
-                              .map((e) => [buildMarkLine(e)])
-                              .toList(),
-                          topBarColor: design.colors.blue.shade600,
-                        ),
-                        padding,
-                        InformationTable(
-                          title: appLocalization.coming_birthdays,
-                          itemsAlign: Alignment.centerLeft,
-                          topBarColor: design.colors.magenta.shade600,
-                          content: (metadata.closestBirthdays ?? [])
-                              .map((e) => [buildBirthdayLine(e)])
-                              .toList(),
-                        )
-                      ],
-                    );
-                  },
+                                : [],
+                            topBarColor: design.colors.green.shade600,
+                          ),
+                          padding,
+                          InformationTable(
+                            title: appLocalization.latest_mark,
+                            content: (metadata.latestMarks ?? [])
+                                .map((e) => [buildMarkLine(e)])
+                                .toList(),
+                            topBarColor: design.colors.blue.shade600,
+                          ),
+                          padding,
+                          InformationTable(
+                            title: appLocalization.coming_birthdays,
+                            itemsAlign: Alignment.centerLeft,
+                            topBarColor: design.colors.magenta.shade600,
+                            content: (metadata.closestBirthdays ?? [])
+                                .map((e) => [buildBirthdayLine(e)])
+                                .toList(),
+                          )
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

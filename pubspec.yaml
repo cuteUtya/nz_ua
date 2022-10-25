@@ -20,6 +20,7 @@ dependencies:
   dio: ^4.0.6
   prefs: ^3.0.0
   sqflite: ^2.1.0
+  connectivity_plus: ^3.0.2
   adobe_spectrum:
     git:
       url: https://github.com/cuteUtya/flutter-adobe-spectrum

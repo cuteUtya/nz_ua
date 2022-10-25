@@ -34,7 +34,9 @@ abstract class NzState {}
 
 @JsonSerializable()
 class NeedLoginState implements NzState {
-  const NeedLoginState({required this.alerts,});
+  const NeedLoginState({
+    required this.alerts,
+  });
   final List<PageAlert> alerts;
 
   factory NeedLoginState.fromJson(Map<String, dynamic> json) =>
@@ -44,7 +46,10 @@ class NeedLoginState implements NzState {
 
 @JsonSerializable()
 class PageAlert {
-  const PageAlert({required this.text, required this.type,});
+  const PageAlert({
+    required this.text,
+    required this.type,
+  });
   final AlertType type;
   final String text;
 
@@ -95,7 +100,6 @@ class ISQLObject<T> {
   get _fields => (_object as dynamic).toJson();
   get _object => this as T;
   get dbTableName => ISQLObject.getNameOfDB(type: (this as T).runtimeType);
-  bool isNullable() => null is T;
 
   static String getNameOfDB<T>({Type? type}) {
     return type == null ? T.toString() : type.toString();
@@ -103,6 +107,10 @@ class ISQLObject<T> {
 
   static String getNameOfChildDB(String defTableName) {
     return '${defTableName}_childdb';
+  }
+
+  Future deleteAllValues() async {
+    nzdb.execute('DROP TABLE $dbTableName');
   }
 
   Future<int> saveAsChild(String childOf) async {
@@ -133,6 +141,7 @@ class ISQLObject<T> {
 
   static Future<Map<String, dynamic>?> getById<T>(int id,
       {bool isChild = false}) async {
+    assert(id >= 1);
     var name = ISQLObject.getNameOfDB<T>();
     if (isChild) name = ISQLObject.getNameOfChildDB(name);
 
@@ -323,7 +332,6 @@ $fields
     return r.isNotEmpty;
   }
 }
-
 
 /// /dashboard/news
 class NewsPageState implements NzState {
@@ -521,12 +529,16 @@ class DiaryTableLessonLine {
 }
 
 @JsonSerializable()
-class Mark {
+class Mark extends ISQLObject {
   Mark({
     required this.value,
     required this.lesson,
     this.theme,
-  });
+  }) : super(schema: {
+          'value': int,
+          'theme': String,
+          'lesson': String,
+        });
   final int? value;
   /**theme? тематична/контрольна/поточна/... */
   final String? theme;
@@ -607,13 +619,18 @@ class DiaryLineContent {
 }
 
 @JsonSerializable()
-class SideMetadata {
+class SideMetadata extends ISQLObject {
   SideMetadata({
     required this.comingHomework,
     required this.latestMarks,
     required this.closestBirthdays,
     required this.me,
-  });
+  }) : super(schema: {
+          'comingHomework': List,
+          'latestMarks': List,
+          'closestBirthdays': List,
+          'me': UserProfileLink,
+        });
   final List<Homework>? comingHomework;
   final List<Mark>? latestMarks;
   final List<Birthday>? closestBirthdays;
@@ -743,8 +760,16 @@ class Semester {
 }
 
 @JsonSerializable()
-class Birthday {
-  Birthday({required this.date, required this.user});
+class Birthday extends ISQLObject {
+  Birthday({
+    required this.date,
+    required this.user,
+  }) : super(
+          schema: {
+            'user': UserProfileLink,
+            'date': String,
+          },
+        );
   final UserProfileLink? user;
   final String? date;
 
@@ -754,8 +779,11 @@ class Birthday {
 }
 
 @JsonSerializable()
-class Homework {
-  Homework({required this.exercises, required this.date});
+class Homework extends ISQLObject {
+  Homework({
+    required this.exercises,
+    required this.date,
+  }) : super(schema: {'date': String, 'exercises': List});
   final String? date;
   final List<Exercise>? exercises;
 
@@ -765,8 +793,14 @@ class Homework {
 }
 
 @JsonSerializable()
-class Exercise {
-  Exercise({required this.exercise, required this.lesson});
+class Exercise extends ISQLObject {
+  Exercise({
+    required this.exercise,
+    required this.lesson,
+  }) : super(schema: {
+          'lesson': String,
+          'exercise': String,
+        });
   final String? lesson;
   final String? exercise;
 
@@ -810,10 +844,12 @@ class UserProfileLink extends ISQLObject {
   UserProfileLink({
     required this.fullName,
     required this.profileUrl,
-  }) : super(schema: {
-          'fullName': String,
-          'profileUrl': String,
-        });
+  }) : super(
+          schema: {
+            'fullName': String,
+            'profileUrl': String,
+          },
+        );
   final String? fullName;
   final String? profileUrl;
 
