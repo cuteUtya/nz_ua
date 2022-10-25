@@ -87,25 +87,22 @@ class _AppMainState extends State<AppMain> {
                   onBuild: (value) => StreamBuilder(
                     stream: widget.api.sideMetadata,
                     builder: (_, data) {
-                      SideMetadata? metadata = data.data ?? (value as SideMetadata?);
+                      SideMetadata? metadata =
+                          data.data ?? (value as SideMetadata?);
 
                       if (data.data == null) {
                         widget.api.forceUpdateMetadata();
                       }
 
-                      if(metadata == null) {
+                      if (metadata == null) {
                         return Container();
                       }
 
-                      print('have metadata value ${metadata.toJson()}');
-
                       //save new value to db
-                      if(data.data != null) {
+                      if (data.data != null) {
                         metadata.deleteAllValues().then(
-                              (value) =>
-                              metadata.save().then((v) =>
-                                  print('SAVE VALUE WITH INDEX $v')),
-                        );
+                              (value) => metadata.save(),
+                            );
                       }
                       var padding = Padding(
                         padding: design.layout.spacing300.top,
