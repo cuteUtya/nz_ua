@@ -110,7 +110,11 @@ class ISQLObject<T> {
   }
 
   Future deleteAllValues() async {
-    nzdb.execute('DROP TABLE $dbTableName');
+    try {
+      nzdb.execute('DROP TABLE $dbTableName');
+    }catch(e){
+      // nothing
+    }
   }
 
   Future<int> saveAsChild(String childOf) async {
@@ -134,7 +138,7 @@ class ISQLObject<T> {
     var query = 'SELECT * FROM $tableName WHERE DB_ID == $id';
     var r = await nzdb.rawQuery(query);
 
-    var obj = await _deserializeSQLObject(r[0]!);
+    var obj = await _deserializeSQLObject(r[0]);
 
     return obj;
   }
