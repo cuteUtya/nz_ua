@@ -188,6 +188,20 @@ Map<String, dynamic> _$MarkToJson(Mark instance) => <String, dynamic>{
       'lesson': instance.lesson,
     };
 
+DiaryContentTopDownDbObject _$DiaryContentTopDownDbObjectFromJson(
+        Map<String, dynamic> json) =>
+    DiaryContentTopDownDbObject(
+      content: (json['content'] as List<dynamic>)
+          .map((e) => DiaryContentTopToDown.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$DiaryContentTopDownDbObjectToJson(
+        DiaryContentTopDownDbObject instance) =>
+    <String, dynamic>{
+      'content': instance.content,
+    };
+
 DiaryContentTopToDown _$DiaryContentTopToDownFromJson(
         Map<String, dynamic> json) =>
     DiaryContentTopToDown(
