@@ -53,7 +53,7 @@ Map<String, dynamic> _$DiaryMarkGridToJson(DiaryMarkGrid instance) =>
 
 DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
     DiaryMarkGridLine(
-      index: json['index'] as int?,
+      num: json['index'] as int?,
       lessonName: json['lessonName'] as String?,
       marks:
           (json['marks'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -61,7 +61,7 @@ DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
     <String, dynamic>{
-      'index': instance.index,
+      'index': instance.num,
       'lessonName': instance.lessonName,
       'marks': instance.marks,
     };
@@ -235,7 +235,7 @@ Map<String, dynamic> _$DiaryDayTopToDownToJson(DiaryDayTopToDown instance) =>
     };
 
 DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
-      index: json['index'] as int?,
+      num: json['index'] as int?,
       lessonTime:
           DateTimeInterval.fromJson(json['lessonTime'] as Map<String, dynamic>),
       content: (json['content'] as List<dynamic>?)
@@ -244,7 +244,7 @@ DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
     );
 
 Map<String, dynamic> _$DiaryLineToJson(DiaryLine instance) => <String, dynamic>{
-      'index': instance.index,
+      'index': instance.num,
       'lessonTime': instance.lessonTime,
       'content': instance.content,
     };
@@ -482,14 +482,14 @@ Map<String, dynamic> _$UserProfileLinkToJson(UserProfileLink instance) =>
 
 DateTimeInterval _$DateTimeIntervalFromJson(Map<String, dynamic> json) =>
     DateTimeInterval(
-      from: json['from'] as String?,
-      to: json['to'] as String?,
+      fromTime: json['from'] as String?,
+      toTime: json['to'] as String?,
     );
 
 Map<String, dynamic> _$DateTimeIntervalToJson(DateTimeInterval instance) =>
     <String, dynamic>{
-      'from': instance.from,
-      'to': instance.to,
+      'from': instance.fromTime,
+      'to': instance.toTime,
     };
 
 Parent _$ParentFromJson(Map<String, dynamic> json) => Parent(

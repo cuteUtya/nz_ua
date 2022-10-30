@@ -4,6 +4,8 @@ import 'package:adobe_spectrum/spectrum_desing.dart';
 import 'package:design_system_provider/desing_provider.dart';
 import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
 import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
@@ -47,7 +49,10 @@ class _DiaryPageState extends State<DiaryPage> {
 
   @override
   void dispose() {
-    //TODO save values
+    var db = DiaryContentTopDownDbObject(content: content);
+    db.deleteAllValues().then((_) => {
+      db.save()
+    });
     streamSubscription?.cancel();
     super.dispose();
   }
@@ -60,11 +65,35 @@ class _DiaryPageState extends State<DiaryPage> {
     print('previus');
   }
 
+  bool isToday(String? s) {
+    if (s == null) return false;
+    return s.contains('сьогодні') ||
+        s.contains(DateTime.now().day.toString()) ||
+        s.contains('сегодня');
+  }
+
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
     if (content.isEmpty) return Container();
     var curr = content[0];
+
+    List<Widget> buildTableLine(DiaryLine line) {
+      return [
+        Container(
+          width: 60,
+          color: Colors.white,
+          alignment: Alignment.center,
+          child: Text.rich(
+            design.typography.text(
+              '${line.lessonTime.fromTime}\n${line.lessonTime.toTime}',
+              size: design.typography.fontSize100.value,
+            ),
+          ),
+        )
+      ];
+    }
+
     return Column(
       children: [
         Row(
@@ -79,7 +108,7 @@ class _DiaryPageState extends State<DiaryPage> {
             ),
             Text.rich(
               design.typography.text(
-                '${curr.interval?.from} — ${curr.interval?.to}',
+                '${curr.interval?.fromTime} — ${curr.interval?.toTime}',
                 size: design.typography.fontSize200.value,
                 semantic: TextSemantic.detail,
               ),
@@ -93,7 +122,22 @@ class _DiaryPageState extends State<DiaryPage> {
               ),
             )
           ],
-        )
+        ),
+        if (curr.content != null)
+          for (var item in curr.content!)
+            Padding(
+              padding: design.layout.spacing300.top,
+              child: InformationTable(
+                title: item.dayDate ?? "bruh",
+                content: [
+                  if (item.lines != null)
+                    for (var line in item.lines!) buildTableLine(line)
+                ],
+                topBarColor: isToday(item.dayDate)
+                    ? design.colors.blue.shade600
+                    : design.colors.gray.shade400,
+              ),
+            ),
       ],
     );
     /*return FutureBuilder(

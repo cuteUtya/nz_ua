@@ -132,11 +132,11 @@ class DiaryMarkGrid {
 @JsonSerializable()
 class DiaryMarkGridLine {
   DiaryMarkGridLine({
-    required this.index,
+    required this.num,
     required this.lessonName,
     required this.marks,
   });
-  final int? index;
+  final int? num;
   final String? lessonName;
   final List<String>? marks;
 
@@ -328,10 +328,13 @@ class DiaryContentTopToDown extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryDayTopToDown {
+class DiaryDayTopToDown extends ISQLObject {
   DiaryDayTopToDown({
     required this.dayDate,
     required this.lines,
+  }) : super(schema: {
+    'dayDate': String,
+    'lines': List,
   });
   final String? dayDate;
   final List<DiaryLine>? lines;
@@ -342,13 +345,17 @@ class DiaryDayTopToDown {
 }
 
 @JsonSerializable()
-class DiaryLine {
+class DiaryLine extends ISQLObject {
   DiaryLine({
-    required this.index,
+    required this.num,
     required this.lessonTime,
     this.content,
+  }) : super(schema: {
+    'num': int,
+    'lessonTime': DateTimeInterval,
+    'content': List
   });
-  final int? index;
+  final int? num;
 
   final DateTimeInterval lessonTime;
 
@@ -361,7 +368,7 @@ class DiaryLine {
 }
 
 @JsonSerializable()
-class DiaryLineContent {
+class DiaryLineContent extends ISQLObject {
   DiaryLineContent({
     required this.name,
     required this.topic,
@@ -369,6 +376,13 @@ class DiaryLineContent {
     required this.homework,
     required this.workType,
     this.mark,
+  }) : super(schema: {
+    'name': String,
+    'topic': String,
+    'classAudience': String,
+    'homework': List,
+    'mark': String,
+    'workType': String,
   });
   final String? name;
   final String? topic;
@@ -624,10 +638,13 @@ class UserProfileLink extends ISQLObject {
 }
 
 @JsonSerializable()
-class DateTimeInterval {
-  DateTimeInterval({required this.from, required this.to});
-  final String? from;
-  final String? to;
+class DateTimeInterval extends ISQLObject {
+  DateTimeInterval({required this.fromTime, required this.toTime, }) : super(schema: {
+    'fromTime': String,
+    'toTime': String,
+  });
+  final String? fromTime;
+  final String? toTime;
 
   factory DateTimeInterval.fromJson(Map<String, dynamic> json) =>
       _$DateTimeIntervalFromJson(json);
