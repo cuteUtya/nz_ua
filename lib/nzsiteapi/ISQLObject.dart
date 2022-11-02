@@ -27,6 +27,10 @@ class ISQLObject<T> {
     return '${defTableName}_childdb';
   }
 
+  static void dropTableByName(String n) async {
+    nzdb.execute('DROP TABLE IF EXISTS $n');
+  }
+
   Future deleteAllValues() async {
     try {
       nzdb.execute('DROP TABLE IF EXISTS $dbTableName');
@@ -157,7 +161,8 @@ class ISQLObject<T> {
       } else {
         if (t != LIST && t != SQL_OBJECT && t != BOOLEAN) {
           if (t == TEXT) {
-            query += "'${val.toString()}'";
+            //TODO un-parse this shit properly lol
+            query += "'${val.toString().replaceAll('\n', '/*/')}'";
           } else if (t == DATETIME) {
             query += "${(val as DateTime)}";
           } else {
