@@ -53,7 +53,7 @@ Map<String, dynamic> _$DiaryMarkGridToJson(DiaryMarkGrid instance) =>
 
 DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
     DiaryMarkGridLine(
-      num: json['index'] as int?,
+      num: json['num'] as int?,
       lessonName: json['lessonName'] as String?,
       marks:
           (json['marks'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -61,7 +61,7 @@ DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
     <String, dynamic>{
-      'index': instance.num,
+      'num': instance.num,
       'lessonName': instance.lessonName,
       'marks': instance.marks,
     };
@@ -191,8 +191,9 @@ Map<String, dynamic> _$MarkToJson(Mark instance) => <String, dynamic>{
 DiaryContentTopDownDbObject _$DiaryContentTopDownDbObjectFromJson(
         Map<String, dynamic> json) =>
     DiaryContentTopDownDbObject(
-      content: (json['content'] as List<dynamic>)
-          .map((e) => DiaryContentTopToDown.fromJson(e as Map<String, dynamic>))
+      content: (json['content'] as List<dynamic>?)
+          ?.map(
+              (e) => DiaryContentTopToDown.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -235,7 +236,7 @@ Map<String, dynamic> _$DiaryDayTopToDownToJson(DiaryDayTopToDown instance) =>
     };
 
 DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
-      num: json['index'] as int?,
+      num: json['num'] as int?,
       lessonTime:
           DateTimeInterval.fromJson(json['lessonTime'] as Map<String, dynamic>),
       content: (json['content'] as List<dynamic>?)
@@ -244,7 +245,7 @@ DiaryLine _$DiaryLineFromJson(Map<String, dynamic> json) => DiaryLine(
     );
 
 Map<String, dynamic> _$DiaryLineToJson(DiaryLine instance) => <String, dynamic>{
-      'index': instance.num,
+      'num': instance.num,
       'lessonTime': instance.lessonTime,
       'content': instance.content,
     };
@@ -255,7 +256,7 @@ DiaryLineContent _$DiaryLineContentFromJson(Map<String, dynamic> json) =>
       topic: json['topic'] as String?,
       classAudience: json['classAudience'] as String?,
       homework: (json['homework'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => Homework.fromJson(e as Map<String, dynamic>))
           .toList(),
       workType: json['workType'] as String?,
       mark: json['mark'] as String?,
@@ -482,14 +483,14 @@ Map<String, dynamic> _$UserProfileLinkToJson(UserProfileLink instance) =>
 
 DateTimeInterval _$DateTimeIntervalFromJson(Map<String, dynamic> json) =>
     DateTimeInterval(
-      fromTime: json['from'] as String?,
-      toTime: json['to'] as String?,
+      fromTime: json['fromTime'] as String?,
+      toTime: json['toTime'] as String?,
     );
 
 Map<String, dynamic> _$DateTimeIntervalToJson(DateTimeInterval instance) =>
     <String, dynamic>{
-      'from': instance.fromTime,
-      'to': instance.toTime,
+      'fromTime': instance.fromTime,
+      'toTime': instance.toTime,
     };
 
 Parent _$ParentFromJson(Map<String, dynamic> json) => Parent(

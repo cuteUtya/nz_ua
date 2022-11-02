@@ -1,10 +1,5 @@
-import 'dart:convert';
-import 'dart:ffi';
-
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
-import 'package:nz_ua/nzsiteapi/nz_db.dart';
 
 part 'types.g.dart';
 
@@ -387,7 +382,7 @@ class DiaryLineContent extends ISQLObject {
   final String? name;
   final String? topic;
   final String? classAudience;
-  final List<String>? homework;
+  final List<Homework>? homework;
   final String? mark;
   /**Поточна/лабараторна/контрольна - те, що і Mark.theme*/
   final String? workType;
