@@ -111,8 +111,11 @@ class NzApi extends StatelessWidget {
     }
   }
 
-  void forceUpdateDiary() async {
+  void forceUpdateDiary({String? fromDate}) async {
     var url = await _executeScript('getScheduleLink.js');
+    if(fromDate != null) {
+      url = url.replaceFirst('diary', 'diary?start_date=$fromDate');
+    }
     _controller!.loadUrl(url.replaceAll('\"', ''));
   }
 
@@ -276,6 +279,18 @@ class NzApi extends StatelessWidget {
         .loadString('Assets/scripts/$script');
     var i = (await _controller!.runJavascriptReturningResult(str));
     return i.toString();
+  }
+
+  void nextDiaryPage() {
+    _executeScript('diaryNext.js');
+  }
+
+  void previusDiaryPage (){
+  _executeScript('diaryPrev.js');
+  }
+
+  void currentDiaryPage() {
+    _executeScript('diaryCurrent.js');
   }
 
   Future<bool> login(String name, String password) async {

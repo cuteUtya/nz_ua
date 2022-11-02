@@ -1,0 +1,1 @@
+document.getElementsByClassName('pnl-prev')[0].click()

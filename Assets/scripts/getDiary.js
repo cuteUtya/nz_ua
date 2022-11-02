@@ -1,6 +1,40 @@
 var dates = document.getElementsByClassName('pt-text')[0].children[0].innerText.split('(')[1].slice(0, -1).split('— ');
-var interval = {fromTime: dates[0], toTime: dates[1]}
+var from = dateToFormat(getThisStartDate())
+var to = new Date(from);
+to.setDate(to.getDate() + 7);
+to = dateToFormat(to);
+var interval = {fromTime: from, toTime: to}
 var days = Array.from(document.getElementsByClassName('dn-items')[0].children)
+
+
+function dateToFormat(c) {
+    return new Date(c).toISOString().split('T')[0]
+}
+
+function getThisStartDate(){
+    console.log(dates)
+    var d = dates[0];
+    var f = parseInt(d.split(' '))
+
+var l = d.split(' ')[1].trim();
+
+var m = {
+'січня': 1,
+'лютого':2,
+'березня': 3,
+'квітня': 4,
+'травня': 5,
+'червня':6,
+'липня':7,
+'серпня':8,
+'вересня':9,
+'жовтня': 10,
+'листопада': 11,
+'грудня': 12,
+}[l];
+
+    return new Date(Date.parse(new Date(`${new Date().getFullYear()}-${m}-${f}`)));
+}
 
 days = days.filter((e) => e.className.split(' ')[0] == 'dn-item');
 
