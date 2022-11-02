@@ -315,7 +315,7 @@ class DiaryContentTopToDown extends ISQLObject {
     required this.interval,
   }) : super(schema: {'interval': DateTimeInterval, 'content': List});
   final DateTimeInterval? interval;
-  final List<DiaryDayTopToDown>? content;
+  final List<DiaryDayTopToDown?>? content;
 
   factory DiaryContentTopToDown.fromJson(Map<String, dynamic> json) =>
       _$DiaryContentTopToDownFromJson(json);

@@ -207,7 +207,9 @@ DiaryContentTopToDown _$DiaryContentTopToDownFromJson(
         Map<String, dynamic> json) =>
     DiaryContentTopToDown(
       content: (json['content'] as List<dynamic>?)
-          ?.map((e) => DiaryDayTopToDown.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => e == null
+              ? null
+              : DiaryDayTopToDown.fromJson(e as Map<String, dynamic>))
           .toList(),
       interval: json['interval'] == null
           ? null
