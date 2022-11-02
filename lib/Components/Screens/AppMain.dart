@@ -28,6 +28,8 @@ class AppMain extends StatefulWidget {
 class _AppMainState extends State<AppMain> {
   late String state = HOME;
 
+  ScrollController _scrollController =  ScrollController();
+
   late List<NavigationBarItem> navigation = [
     NavigationBarItem(
       name: appLocalization.home,
@@ -73,7 +75,7 @@ class _AppMainState extends State<AppMain> {
     if (state == HOME) {
       page = Homepage(api: widget.api);
     } else if(state == DIARY) {
-      page = DiaryPage(api: widget.api);
+      page = DiaryPage(api: widget.api, contentScroll: _scrollController,);
     }
 
     return Column(
@@ -81,6 +83,7 @@ class _AppMainState extends State<AppMain> {
       children: [
         Expanded(
           child: ListView(
+            controller: _scrollController,
             padding: design.layout.spacing300.vertical,
             children: [
               Padding(

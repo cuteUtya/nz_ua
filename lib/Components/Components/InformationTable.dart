@@ -11,12 +11,13 @@ class InformationTable extends StatefulWidget {
     required this.content,
     this.itemsAlign = Alignment.center,
     this.topBarColor,
+    this.columnsSize,
   }) : super(key: key);
   final Color? topBarColor;
   final String title;
   final List<List<Widget>> content;
   final Alignment itemsAlign;
-
+  final List<double>? columnsSize;
 
   @override
   State<StatefulWidget> createState() => _InformationTableState();
@@ -45,12 +46,10 @@ class _InformationTableState extends State<InformationTable> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text.rich(
-                design.typography.text(
-                  widget.title,
-                  size: design.typography.fontSize100.value,
-                  semantic: TextSemantic.heading,
-                  color: Colors.white
-                ),
+                design.typography.text(widget.title,
+                    size: design.typography.fontSize100.value,
+                    semantic: TextSemantic.heading,
+                    color: Colors.white),
               )
             ],
           ),
@@ -72,14 +71,14 @@ class _InformationTableState extends State<InformationTable> {
               right: 2,
               left: 2,
             ),
-            child: buildContent(),
+            child: buildContent(MediaQuery.of(context).size),
           ),
         ),
       ],
     );
   }
 
-  Widget buildContent() {
+  Widget buildContent(Size size) {
     var design = Desing.of(context);
 
     List<Widget> content = [];
@@ -87,19 +86,30 @@ class _InformationTableState extends State<InformationTable> {
     for (var row in widget.content) {
       List<Widget> c = [];
       for (var child in row) {
+        var s1 = Align(
+          alignment: widget.itemsAlign,
+          child: child,
+        );
         c.add(
-          Expanded(
-            child: Align(
-              alignment:  widget.itemsAlign,
-                child: child,
-            ),
-          ),
+          widget.columnsSize == null
+              ? Expanded(
+                  child: s1,
+                )
+              : Container(
+                  //TODO - 16 - 20? paddings?
+                  width: (size.width - 16 - 20) *
+                      widget.columnsSize![row.indexOf(child)],
+                  height: double.infinity,
+                  child: s1,
+                ),
         );
         if (row.indexOf(child) != row.length - 1) {
           c.add(
-            VerticalDivider(
-              thickness: 2,
-              color: design.colors.gray.shade300,
+             VerticalDivider(
+                thickness: 2,
+                color: design.colors.gray.shade300,
+                width: 0,
+
             ),
           );
         }
