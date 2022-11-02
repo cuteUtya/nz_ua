@@ -1,0 +1,1 @@
+document.getElementsByClassName('pnl-today')[0].click()
