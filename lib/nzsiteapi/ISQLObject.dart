@@ -29,7 +29,7 @@ class ISQLObject<T> {
 
   Future deleteAllValues() async {
     try {
-      nzdb.execute('DROP TABLE $dbTableName');
+      nzdb.execute('DROP TABLE IF EXISTS $dbTableName');
     } catch (e) {
       // nothing
     }
