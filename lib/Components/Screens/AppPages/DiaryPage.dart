@@ -115,6 +115,7 @@ class _DiaryPageState extends State<DiaryPage> {
       var time = Container(
         width: 60,
         alignment: Alignment.center,
+        margin: design.layout.spacing100.vertical,
         child: Text.rich(
           design.typography.text(
             '${line.lessonTime.fromTime ?? ''}\n${line.lessonTime.toTime ?? ''}',
