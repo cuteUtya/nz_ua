@@ -127,11 +127,9 @@ class DiaryMarkGrid {
 @JsonSerializable()
 class DiaryMarkGridLine {
   DiaryMarkGridLine({
-    required this.num,
     required this.lessonName,
     required this.marks,
   });
-  final int? num;
   final String? lessonName;
   final List<String>? marks;
 

@@ -53,7 +53,6 @@ Map<String, dynamic> _$DiaryMarkGridToJson(DiaryMarkGrid instance) =>
 
 DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
     DiaryMarkGridLine(
-      num: json['num'] as int?,
       lessonName: json['lessonName'] as String?,
       marks:
           (json['marks'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -61,7 +60,6 @@ DiaryMarkGridLine _$DiaryMarkGridLineFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DiaryMarkGridLineToJson(DiaryMarkGridLine instance) =>
     <String, dynamic>{
-      'num': instance.num,
       'lessonName': instance.lessonName,
       'marks': instance.marks,
     };

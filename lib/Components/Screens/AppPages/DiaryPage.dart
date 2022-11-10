@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:adobe_spectrum/Components/action_group.dart';
 import 'package:adobe_spectrum/spectrum_desing.dart';
+import 'package:design_system_provider/desing_components.dart';
 import 'package:design_system_provider/desing_provider.dart';
 import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,10 +11,13 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:intl/intl.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/TextWithIcon.dart';
+import 'package:nz_ua/Components/Screens/AppPages/DiaryPage/DiaryPageGridView.dart';
+import 'package:nz_ua/Components/Screens/AppPages/DiaryPage/DiaryPageLineView.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
 import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../Components/MarkDisplay.dart';
 
@@ -29,69 +34,24 @@ class DiaryPage extends StatefulWidget {
 }
 
 class _DiaryPageState extends State<DiaryPage> {
-  List<DiaryContentTopToDown> content = [];
-  StreamSubscription? streamSubscription;
   late DateTime currentFromDate = DateTime.now();
-  final List<GlobalKey> _keys = [];
-  int todayIndex = 0;
-  bool inited = false;
+  BehaviorSubject<DateTimeInterval> intervalSubject =
+      BehaviorSubject<DateTimeInterval>();
+
+  bool isGridView = false;
 
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) {
-        if (!inited && _keys.isNotEmpty) {
-          inited = true;
-          scrollToToday();
-        }
-      },
-    );
 
-    var current = tryFindMatchContent(formatDate(currentFromDate));
-
-    if (current?.content == null) {
-      print('no selected content, load');
-      widget.api.forceUpdateDiary(fromDate: formatDate(currentFromDate));
-      //TODO load screen
-      return Container();
-    }
-
-    List<Widget> items = [];
-
-    _keys.clear();
-    for (var item in current!.content!) {
-      if (item != null) {
-        _keys.add(GlobalKey());
-        bool today = isToday(item.dayDate);
-        if (today) {
-          todayIndex = current!.content!.indexOf(item);
-        }
-        items.add(
-          Padding(
-            key: _keys.last,
-            padding: design.layout.spacing300.top,
-            child: InformationTable(
-              key: UniqueKey(),
-              title: item.dayDate ?? "bruh",
-              columnsSize: const [0.15, 0.85],
-              content: [
-                if (item.lines != null)
-                  for (var line in item.lines!) buildTableLine(line)
-              ],
-              topBarColor: today
-                  ? design.colors.blue.shade600
-                  : design.colors.gray.shade400,
-            ),
-          ),
-        );
-      }
-    }
-
-    print(current?.interval?.fromTime);
+    print(currentFromDate);
 
     return Column(
       children: <Widget>[
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -102,13 +62,21 @@ class _DiaryPageState extends State<DiaryPage> {
                     color: design.colors.gray.shade900,
                   ),
                 ),
-                Text.rich(
-                  design.typography.text(
-                    '${current!.interval?.fromTime} — ${current!.interval?.toTime}',
-                    size: design.typography.fontSize200.value,
-                    semantic: TextSemantic.detail,
-                  ),
-                  textAlign: TextAlign.center,
+                StreamBuilder(
+                  stream: intervalSubject.stream,
+                  builder: (_, d) {
+                    if(d.data != null) {
+                      currentFromDate = DateTime.parse(d.data!.fromTime!);
+                    }
+                    return Text.rich(
+                      design.typography.text(
+                        '${d.data?.fromTime} — ${d.data?.toTime}',
+                        size: design.typography.fontSize200.value,
+                        semantic: TextSemantic.detail,
+                      ),
+                      textAlign: TextAlign.center,
+                    );
+                  }
                 ),
                 GestureDetector(
                   onTap: () => next(),
@@ -116,203 +84,63 @@ class _DiaryPageState extends State<DiaryPage> {
                     SpectrumIcons.smock_chevronright,
                     color: design.colors.gray.shade900,
                   ),
-                )
+                ),
               ],
             ),
-          ] +
-          items,
-    );
-  }
-
-  String formatDate(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
-
-  DiaryContentTopToDown? tryFindMatchContent(String dateString) {
-    var date = DateTime.parse(dateString);
-
-    DiaryContentTopToDown? r;
-
-    for (var element in content) {
-      if ((element.interval?.fromTime ?? '') != '' &&
-          (element.interval?.toTime ?? '') != '') {
-        if (DateTime.parse(element.interval!.fromTime!).isBefore(date) &&
-            DateTime.parse(element.interval!.toTime!).isAfter(date)) {
-          r = element;
-        }
-      }
-    }
-
-    return r;
-  }
-
-  void scrollToToday() {
-    var design = Desing.of(context);
-    var padding = design.layout.spacing300.top.vertical;
-    double position = padding;
-
-    for (var c = 0; c < todayIndex; c++) {
-      position += _keys[c].currentContext!.size!.height;
-      position += padding;
-    }
-
-    widget.contentScroll.animateTo(
-      position,
-      duration: const Duration(seconds: 1),
-      curve: Curves.bounceIn,
-    );
-  }
-
-  List<Widget> buildTableLine(DiaryLine line) {
-    var design = Desing.of(context);
-    var time = Container(
-      width: 60,
-      alignment: Alignment.center,
-      margin: design.layout.spacing100.vertical,
-      child: Text.rich(
-        design.typography.text(
-          '${line.lessonTime.fromTime ?? ''}\n${line.lessonTime.toTime ?? ''}',
-          size: design.typography.fontSize100.value,
-        ),
-      ),
-    );
-
-    Widget buildHomework(Homework s) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: design.layout.spacing100.top
-                .add(design.layout.spacing100.bottom),
-            child: Dash(
-              dashColor: design.colors.gray.shade300,
-              dashGap: 8,
-              dashLength: 8,
-              //TODO - 50? Also bruh
-              length: MediaQuery.of(context).size.width * 0.85 - 50,
+            ActionGroup(
+              items: const [
+                ActionItem(
+                  icon: SpectrumIcons.smock_viewlist,
+                ),
+                ActionItem(
+                  icon: SpectrumIcons.smock_viewgrid,
+                )
+              ],
+              onChange: (d) => setState(
+                  () => isGridView = d[0].icon == SpectrumIcons.smock_viewgrid),
+              enableSelection: true,
+              allowEmptySelection: false,
+              selectionMode: SelectionMode.single,
+              size: ButtonSize.small,
             ),
-          ),
-          Text.rich(
-            design.typography.text(
-              s.exercises?.first.exercise ?? '',
-              size: design.typography.fontSize75.value,
-            ),
-          )
-        ],
-      );
-    }
-
-    Widget buildContent(DiaryLineContent content) {
-      Widget r = Padding(
-        padding: design.layout.spacing100.all,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text.rich(
-              design.typography.text(
-                content.name ?? '',
-                size: design.typography.fontSize100.value,
-                semantic: TextSemantic.heading,
-              ),
-            ),
-            if ((content.classAudience ?? '') != '')
-              TextWithIcon(
-                text: content.classAudience!,
-                icon: SpectrumIcons.smock_locationbaseddate,
-              ),
-            if ((content.topic ?? '') != '')
-              TextWithIcon(
-                text: content.topic ?? '',
-                icon: SpectrumIcons.smock_tasklist,
-              ),
-            for (Homework hm in (content.homework ?? []))
-              if (hm.exercises?.isNotEmpty ?? false)
-                if ((hm.exercises![0].exercise ?? '') != '') buildHomework(hm)
           ],
         ),
-      );
-
-      var markInt = int.tryParse(content.mark.toString());
-
-      if (markInt != null) {
-        r = Stack(
-          children: [
-            r,
-            Positioned(
-              right: design.layout.spacing200.right.horizontal,
-              top: design.layout.spacing200.top.vertical,
-              child: MarkDisplay(
-                mark: markInt,
-              ),
-            )
-          ],
-        );
-      }
-
-      return r;
-    }
-
-    Widget content = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var c in line.content ?? []) buildContent(c),
+        isGridView
+            ? Padding(
+                padding: design.layout.spacing100.top,
+                child: DiaryPageGridView(
+                  api: widget.api,
+                  fromDate: formatDate(currentFromDate),
+                  intervalStream: intervalSubject,
+                  controller: widget.contentScroll,
+                ),
+              )
+            : DiaryPageLineView(
+                api: widget.api,
+                currentFromDate: formatDate(currentFromDate),
+                intervalStream: intervalSubject,
+              )
       ],
     );
-
-    return [time, content];
-  }
-
-  @override
-  void initState() {
-    loadValuesFromDB();
-    listenNewValues();
-    super.initState();
-  }
-
-  void listenNewValues() {
-    streamSubscription = widget.api.diaryContentTopDown.listen(
-      (event) {
-        setState(() => content.add(event));
-      },
-    );
-  }
-
-  void loadValuesFromDB() async {
-    // drop table
-    // DiaryContentTopDownDbObject(content: []).deleteAllValues();
-    var c = await ISQLObject.getById<DiaryContentTopDownDbObject>(1);
-    try {
-      if (c != null) {
-        var d = DiaryContentTopDownDbObject.fromJson(c).content;
-        if (d != null) setState(() => content = d);
-      }
-    } catch (e) {
-      //TODO fix null's while parsing
-    }
-  }
-
-  @override
-  void dispose() {
-    if (content.isNotEmpty) {
-      var db = DiaryContentTopDownDbObject(content: content);
-      ISQLObject.dropTableByName(ISQLObject.getNameOfChildDB(ISQLObject.getNameOfDB(type: DiaryContentTopToDown)));
-      db.deleteAllValues().then((_) => {db.save()});
-    }
-    streamSubscription?.cancel();
-    super.dispose();
   }
 
   Duration week = const Duration(days: 7);
+  Duration halfOfMouth = const Duration(days: 15);
+
+  String formatDate(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
   void next() {
-    setState(() => currentFromDate = currentFromDate.add(week));
+    if(isGridView) {
+      widget.api.nextDiaryPage();
+    } else {
+      setState(() => currentFromDate = currentFromDate.add(week));
+    }
   }
 
   void previus() {
-    setState(() => currentFromDate = currentFromDate.subtract(week));
-  }
-
-  bool isToday(String? s) {
-    if (s == null) return false;
-    bool r = s.contains('сьогодні') || s.contains('сегодня');
-    return r;
-  }
+    if(isGridView) {
+      widget.api.previusDiaryPage();
+    } else {
+    setState(() => currentFromDate = currentFromDate.subtract(isGridView ? halfOfMouth : week));
+  }}
 }

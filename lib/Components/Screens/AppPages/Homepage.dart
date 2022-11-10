@@ -69,6 +69,8 @@ class Homepage extends StatelessWidget {
         builder: (_, data) {
           SideMetadata? metadata = data.data ?? (value as SideMetadata?);
 
+          print(metadata);
+
           if (data.data == null) {
             api.forceUpdateMetadata();
           }
@@ -79,9 +81,7 @@ class Homepage extends StatelessWidget {
 
           //save new value to db
           if (data.data != null) {
-            metadata.deleteAllValues().then(
-                  (value) => metadata.save(),
-                );
+            metadata.save(id: 1);
           }
           var padding = Padding(
             padding: design.layout.spacing300.top,

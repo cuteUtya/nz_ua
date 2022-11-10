@@ -31,21 +31,23 @@ class MarkDisplay extends StatelessWidget {
             (mark ?? -1).toString(),
             size: design.typography.fontSize100.value,
             semantic: TextSemantic.heading,
-            color: {
-                  12: const Color(0xFF11B200),
-                  11: const Color(0xFF56BA00),
-                  10: const Color(0xFF81C000),
-                  9: const Color(0xFFA9C000),
-                  8: const Color(0xFFDBC000),
-                  7: const Color(0xFFF4C000),
-                  6: const Color(0xFFFFB300),
-                  5: const Color(0xFFFF9C00),
-                }[mark ?? 12] ??
-                const Color(0xFFFF4F00),
+            color: getColorOfMark(mark)
           ),
           textAlign: TextAlign.center,
         ),
       ),
     );
   }
+
+  static getColorOfMark(int? mark) => {
+    12: const Color(0xFF11B200),
+    11: const Color(0xFF56BA00),
+    10: const Color(0xFF81C000),
+    9: const Color(0xFFA9C000),
+    8: const Color(0xFFDBC000),
+    7: const Color(0xFFF4C000),
+    6: const Color(0xFFFFB300),
+    5: const Color(0xFFFF9C00),
+  }[mark ?? 12] ??
+      const Color(0xFFFF4F00);
 }

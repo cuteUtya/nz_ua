@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:nz_ua/nzsiteapi/nz_db.dart';
 
 class ISQLObject<T> {
@@ -57,16 +58,18 @@ class ISQLObject<T> {
 
   static Future<Map<String, dynamic>?> getByIdTableName(
       int id, String tableName) async {
-    try {
+    //try {
       var query = 'SELECT * FROM $tableName WHERE DB_ID == $id';
       var r = await nzdb.rawQuery(query);
 
-      var obj = await _deserializeSQLObject(r[0]);
+      if(r.isNotEmpty) {
+        var obj = await _deserializeSQLObject(r[0]);
 
-      return obj;
-    }catch(e) {
+        return obj;
+        //  }catch(e) {
+      }
       // just returns null
-    }
+ //   }
   }
 
   static Future<Map<String, dynamic>?> getById<T>(int id,
@@ -130,30 +133,44 @@ class ISQLObject<T> {
     return jsonMap;
   }
 
-  Future<int> save({String? tableName}) async {
+
+
+  Future<int> save({String? tableName, int? id}) async {
     var fields = _fields;
 
     if (!await tableIsExists(dbTableName)) {
       createTable(schema);
     }
 
+    bool update = id == null ? false : ((await ISQLObject.getByIdTableName(id, tableName ?? dbTableName)) == null);
+
     String getFields() {
-      var s = '';
-      schema.forEach((key, value) {
-        s += "$key, ";
-      });
-      s = s.substring(0, s.length - 2);
-      return s;
+      if(!update) {
+        var s = '';
+        schema.forEach((key, value) {
+          s += "$key, ";
+        });
+        s = s.substring(0, s.length - 2);
+        return s;
+      } 
+      
+      return '';
     }
 
-    var query =
-        'INSERT INTO ${tableName ?? dbTableName} (${getFields()})\nVALUES (';
+    String query;
+    if(update) {
+      query = 'UPDATE ${tableName ?? dbTableName}\nSET ';
+    } else {
+      query = 'INSERT INTO ${tableName ?? dbTableName} (${getFields()})\nVALUES (';
+    }
     var kList = schema.keys.toList();
     var vList = schema.values.toList();
     for (var i = 0; i < schema.length; i++) {
       var key = kList[i];
       var value = vList[i];
 
+      if(update) query += '${kList[i]} = ';
+      
       var t = getFieldType(value);
       var val = fields[key];
       if (val == null) {
@@ -204,7 +221,12 @@ class ISQLObject<T> {
 
     query = query.substring(0, query.length - 2);
 
-    query += ')';
+    if(!update) {
+      query += ')';
+    }
+    else {
+      query += '\nWHERE DB_ID = $id';
+    }
 
     await nzdb.execute(query);
 

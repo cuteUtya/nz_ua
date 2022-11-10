@@ -28,8 +28,13 @@ class NzApi extends StatelessWidget {
   final BehaviorSubject<SideMetadata> _metadata = BehaviorSubject();
   Stream<SideMetadata> get sideMetadata => _metadata.stream;
 
-  final BehaviorSubject<DiaryContentTopToDown> _diaryContentTopDown = BehaviorSubject();
-  Stream<DiaryContentTopToDown> get diaryContentTopDown => _diaryContentTopDown.stream;
+  final BehaviorSubject<DiaryContentTopToDown> _diaryContentTopDown =
+      BehaviorSubject();
+  Stream<DiaryContentTopToDown> get diaryContentTopDown =>
+      _diaryContentTopDown.stream;
+
+  final BehaviorSubject<DiaryMarkGrid> _diaryContentGrid = BehaviorSubject();
+  Stream<DiaryMarkGrid> get diaryContentGrid => _diaryContentGrid.stream;
 
   late BuildContext _context;
 
@@ -54,6 +59,13 @@ class NzApi extends StatelessWidget {
               if (_hasInternet) {
                 _onInternetReturn();
               }
+            }
+
+            if (!_hasInternet &&
+                currLoginState is NeedLoginState &&
+                Prefs.getString('username').isNotEmpty) {
+              //offline login
+              _changeLoginState(StateLogined());
             }
           });
         }
@@ -111,12 +123,24 @@ class NzApi extends StatelessWidget {
     }
   }
 
-  void forceUpdateDiary({String? fromDate}) async {
-    var url = await _executeScript('getScheduleLink.js');
-    if(fromDate != null) {
-      url = url.replaceFirst('diary', 'diary?start_date=$fromDate');
+  void forceUpdateGridDiary({String? fromDate}) async {
+    await forceUpdateDiary();
+    var link = await _controller!.runJavascriptReturningResult('document.getElementsByClassName(\'table-view-link\')[0].href');
+    link = link.replaceAll('\"', '');
+    print('grid diry link is $link');
+    await _controller!.loadUrl(link);
+  }
+
+  Future forceUpdateDiary({String? fromDate}) async {
+    try {
+      var url = await _executeScript('getScheduleLink.js');
+      if (fromDate != null) {
+        url = url.replaceFirst('diary', 'diary?start_date=$fromDate');
+      }
+      _controller!.loadUrl(url.replaceAll('\"', ''));
+    } catch (e) {
+      // we have no internet or smth like that
     }
-    _controller!.loadUrl(url.replaceAll('\"', ''));
   }
 
   void forceUpdateMetadata() {
@@ -128,10 +152,15 @@ class NzApi extends StatelessWidget {
     _changeLoginState(state);
     currSiteState = state;
 
-    switch(state.runtimeType) {
+    switch (state.runtimeType) {
       case DiaryPageState:
         var c = (state as DiaryPageState).content;
-        if(c != null) _diaryContentTopDown.add(c);
+        if (c != null) _diaryContentTopDown.add(c);
+        break;
+
+      case DiaryGridState:
+        var c = (state as DiaryGridState).content;
+        if (c != null) _diaryContentGrid.add(c);
         break;
     }
 
@@ -259,6 +288,21 @@ class NzApi extends StatelessWidget {
       );
     }
 
+    var scheduleGridRegex = RegExp('schedule\/journal');
+    print(url);
+    if (scheduleGridRegex.hasMatch(url)) {
+      _changeSiteState(
+        DiaryGridState(
+          content: DiaryMarkGrid.fromJson(
+            json.decode(
+              await _executeScript('getDiaryGrid.js'),
+            ),
+          ),
+          meta: await _getMetadata(),
+        ),
+      );
+    }
+
     var scheduleRegex = RegExp('school.*\/schedule');
     if (scheduleRegex.hasMatch(url)) {
       _changeSiteState(
@@ -285,8 +329,8 @@ class NzApi extends StatelessWidget {
     _executeScript('diaryNext.js');
   }
 
-  void previusDiaryPage (){
-  _executeScript('diaryPrev.js');
+  void previusDiaryPage() {
+    _executeScript('diaryPrev.js');
   }
 
   void currentDiaryPage() {
