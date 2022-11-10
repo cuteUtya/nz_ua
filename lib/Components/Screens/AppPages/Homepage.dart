@@ -7,14 +7,21 @@ import 'package:nz_ua/Components/db_loader_wrapper.dart';
 import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
+import 'package:prefs/prefs.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   const Homepage({
     Key? key,
     required this.api,
   }) : super(key: key);
 
   final NzApi api;
+
+  @override
+  State<StatefulWidget> createState() => HomepageState();
+}
+
+class HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
@@ -65,14 +72,14 @@ class Homepage extends StatelessWidget {
       parseCallback: SideMetadata.fromJson,
       id: 1,
       onBuild: (value) => StreamBuilder(
-        stream: api.sideMetadata,
+        stream: widget.api.sideMetadata,
         builder: (_, data) {
           SideMetadata? metadata = data.data ?? (value as SideMetadata?);
 
           print(metadata);
 
           if (data.data == null) {
-            api.forceUpdateMetadata();
+            widget.api.forceUpdateMetadata();
           }
 
           if (metadata == null) {
@@ -91,7 +98,7 @@ class Homepage extends StatelessWidget {
             children: [
               InformationTable(
                 title: appLocalization.tomorrow_homework,
-                content: (metadata.comingHomework?.length ?? 0) == 0
+                content: /* (metadata.comingHomework?.length ?? 0) == 0
                     ? [
                         [
                           Padding(
@@ -105,7 +112,51 @@ class Homepage extends StatelessWidget {
                           ),
                         ]
                       ]
-                    : [],
+                    : */
+                    [
+                  for (Exercise homework
+                      in metadata!.comingHomework!.first.exercises ?? [])
+                    [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: design.layout.spacing100.all,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text.rich(
+                                  design.typography.text(homework.lesson ?? '',
+                                      size: design.typography.fontSize100.value,
+                                      semantic: TextSemantic.heading),
+                                ),
+                                Text.rich(
+                                  design.typography.text(
+                                    homework.exercise ?? '',
+                                    size: design.typography.fontSize100.value,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 1.1,
+                            child: Checkbox(
+                              value: Prefs.getBool(
+                                  getExercisePrefsString(homework)),
+                              onChanged: (v) async {
+                                await Prefs.setBool(
+                                  getExercisePrefsString(homework),
+                                  v,
+                                );
+                                setState((){});
+                              }
+                            ),
+                          )
+                        ],
+                      )
+                    ]
+                ],
                 topBarColor: design.colors.green.shade600,
               ),
               padding,
@@ -130,5 +181,9 @@ class Homepage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String getExercisePrefsString(Exercise homework) {
+    return '${homework.exercise}//${homework.lesson}';
   }
 }
