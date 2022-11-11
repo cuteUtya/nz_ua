@@ -299,17 +299,16 @@ TabSet _$TabSetFromJson(Map<String, dynamic> json) => TabSet(
       tabs: (json['tabs'] as List<dynamic>?)
           ?.map((e) => Tab.fromJson(e as Map<String, dynamic>))
           .toList(),
-      activeTab: json['activeTab'] as String?,
     );
 
 Map<String, dynamic> _$TabSetToJson(TabSet instance) => <String, dynamic>{
       'tabs': instance.tabs,
-      'activeTab': instance.activeTab,
     };
 
 Tab _$TabFromJson(Map<String, dynamic> json) => Tab(
       link: json['link'] as String?,
       name: json['name'] as String?,
+      active: json['active'] as bool?
     );
 
 Map<String, dynamic> _$TabToJson(Tab instance) => <String, dynamic>{

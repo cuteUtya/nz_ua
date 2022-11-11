@@ -73,6 +73,7 @@ class HomepageState extends State<Homepage> {
       id: 1,
       onBuild: (value) => StreamBuilder(
         stream: widget.api.sideMetadata,
+        initialData: null,
         builder: (_, data) {
           SideMetadata? metadata = data.data ?? (value as SideMetadata?);
 
@@ -98,63 +99,62 @@ class HomepageState extends State<Homepage> {
             children: [
               InformationTable(
                 title: appLocalization.tomorrow_homework,
-                content: /* (metadata.comingHomework?.length ?? 0) == 0
-                    ? [
-                        [
-                          Padding(
-                            padding: design.layout.spacing200.all,
-                            child: Text.rich(
-                              design.typography.text(
-                                appLocalization.no_homework_tomorrow,
-                                size: design.typography.fontSize100.value,
+                content: [
+                  if ((metadata?.comingHomework ?? []).isNotEmpty)
+                    for (Exercise homework
+                        in metadata!.comingHomework!.first.exercises ?? [])
+                      [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: design.layout.spacing100.all,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text.rich(
+                                    design.typography.text(
+                                        homework.lesson ?? '',
+                                        size:
+                                            design.typography.fontSize100.value,
+                                        semantic: TextSemantic.heading),
+                                  ),
+                                  Text.rich(
+                                    design.typography.text(
+                                      homework.exercise ?? '',
+                                      size: design.typography.fontSize100.value,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ]
+                            Transform.scale(
+                              scale: 1.1,
+                              child: Checkbox(
+                                  value: Prefs.getBool(
+                                      getExercisePrefsString(homework)),
+                                  onChanged: (v) async {
+                                    await Prefs.setBool(
+                                      getExercisePrefsString(homework),
+                                      v,
+                                    );
+                                    setState(() {});
+                                  }),
+                            )
+                          ],
+                        )
                       ]
-                    : */
+                  else
                     [
-                  for (Exercise homework
-                      in metadata!.comingHomework!.first.exercises ?? [])
-                    [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: design.layout.spacing100.all,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text.rich(
-                                  design.typography.text(homework.lesson ?? '',
-                                      size: design.typography.fontSize100.value,
-                                      semantic: TextSemantic.heading),
-                                ),
-                                Text.rich(
-                                  design.typography.text(
-                                    homework.exercise ?? '',
-                                    size: design.typography.fontSize100.value,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      Padding(
+                        padding: design.layout.spacing200.all,
+                        child: Text.rich(
+                          design.typography.text(
+                            appLocalization.no_homework_tomorrow,
+                            size: design.typography.fontSize100.value,
                           ),
-                          Transform.scale(
-                            scale: 1.1,
-                            child: Checkbox(
-                              value: Prefs.getBool(
-                                  getExercisePrefsString(homework)),
-                              onChanged: (v) async {
-                                await Prefs.setBool(
-                                  getExercisePrefsString(homework),
-                                  v,
-                                );
-                                setState((){});
-                              }
-                            ),
-                          )
-                        ],
-                      )
+                        ),
+                      ),
                     ]
                 ],
                 topBarColor: design.colors.green.shade600,

@@ -417,10 +417,8 @@ class SideMetadata extends ISQLObject {
 class TabSet {
   TabSet({
     required this.tabs,
-    required this.activeTab,
   });
   final List<Tab>? tabs;
-  final String? activeTab;
 
   factory TabSet.fromJson(Map<String, dynamic> json) => _$TabSetFromJson(json);
   Map<String, dynamic> toJson() => _$TabSetToJson(this);
@@ -431,9 +429,11 @@ class Tab {
   Tab({
     required this.link,
     required this.name,
+    required this.active,
   });
   final String? link;
   final String? name;
+  final bool? active;
 
   factory Tab.fromJson(Map<String, dynamic> json) => _$TabFromJson(json);
   Map<String, dynamic> toJson() => _$TabToJson(this);

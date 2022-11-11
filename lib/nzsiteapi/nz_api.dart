@@ -14,7 +14,7 @@ class NzApi extends StatelessWidget {
   NzApi({Key? key, required this.onLoad}) : super(key: key);
 
   Function(NzApi) onLoad;
-  static WebViewController? _controller;
+  static WebViewController? controller;
   NzState? currSiteState;
   NzState? currLoginState;
   String? token;
@@ -35,6 +35,9 @@ class NzApi extends StatelessWidget {
 
   final BehaviorSubject<DiaryMarkGrid> _diaryContentGrid = BehaviorSubject();
   Stream<DiaryMarkGrid> get diaryContentGrid => _diaryContentGrid.stream;
+
+  final BehaviorSubject<NewsPageState> _newsState = BehaviorSubject();
+  Stream<NewsPageState> get newsStream => _newsState.stream;
 
   late BuildContext _context;
 
@@ -74,7 +77,7 @@ class NzApi extends StatelessWidget {
             print('created');
             c.loadUrl('${baseUrl}/menu');
 
-            _controller ??= c.webViewController;
+            controller ??= c.webViewController;
             token = Prefs.getString('apiToken');
             print('token = $token');
             if (!_inited && !_loaded) {
@@ -85,7 +88,7 @@ class NzApi extends StatelessWidget {
           },
           onPageFinished: (c) {
             _onUrlChange(c);
-            if (!_inited && _controller != null) {
+            if (!_inited && controller != null) {
               _inited = true;
               _loaded = true;
               onLoad(this);
@@ -98,13 +101,13 @@ class NzApi extends StatelessWidget {
   }
 
   void _onInternetReturn() {
-    _controller?.reload();
+    controller?.reload();
   }
 
   /// loads specified URL, parse html and changes [_loginState]
   /// `url` - only url path
   Future<void> loadUrl(String url, {Map<String, String>? headers}) async {
-    await _controller!.loadUrl("$baseUrl/$url", headers: headers);
+    await controller!.loadUrl("$baseUrl/$url", headers: headers);
   }
 
   void _changeLoginState(NzState state) {
@@ -123,12 +126,17 @@ class NzApi extends StatelessWidget {
     }
   }
 
+  void forceUpdateNews({String? url}) {
+    controller!.loadUrl(url ?? '$baseUrl/dashboard/news');
+  }
+
   void forceUpdateGridDiary({String? fromDate}) async {
     await forceUpdateDiary();
-    var link = await _controller!.runJavascriptReturningResult('document.getElementsByClassName(\'table-view-link\')[0].href');
+    var link = await controller!.runJavascriptReturningResult(
+        'document.getElementsByClassName(\'table-view-link\')[0].href');
     link = link.replaceAll('\"', '');
     print('grid diry link is $link');
-    await _controller!.loadUrl(link);
+    await controller!.loadUrl(link);
   }
 
   Future forceUpdateDiary({String? fromDate}) async {
@@ -137,14 +145,14 @@ class NzApi extends StatelessWidget {
       if (fromDate != null) {
         url = url.replaceFirst('diary', 'diary?start_date=$fromDate');
       }
-      _controller!.loadUrl(url.replaceAll('\"', ''));
+      controller!.loadUrl(url.replaceAll('\"', ''));
     } catch (e) {
       // we have no internet or smth like that
     }
   }
 
   void forceUpdateMetadata() {
-    _controller!.loadUrl('$baseUrl/dashboard/news');
+    controller!.loadUrl('$baseUrl/dashboard/news');
   }
 
   void _changeSiteState(NzState state) {
@@ -161,6 +169,10 @@ class NzApi extends StatelessWidget {
       case DiaryGridState:
         var c = (state as DiaryGridState).content;
         if (c != null) _diaryContentGrid.add(c);
+        break;
+
+      case NewsPageState:
+        _newsState.add((state as NewsPageState));
         break;
     }
 
@@ -211,12 +223,21 @@ class NzApi extends StatelessWidget {
       case '/account/forgot-password':
         _changeSiteState(NeedEmailState());
         break;
+
+      case '/dashboard/school-news':
+      case '/dashboard/global-news':
       case '/dashboard/news':
         if (_hasInternet) {
           var tabs =
               TabSet.fromJson(json.decode(await _executeScript('getTabs.js')));
-          var news =
-              NewsArr.fromJson(json.decode(await _executeScript('getNews.js')));
+          String script = path == '/dashboard/global-news'
+              ? 'getProjectNews.js'
+              : 'getNews.js';
+          var news = NewsArr.fromJson(
+            json.decode(
+              await _executeScript(script),
+            ),
+          );
           var meta = await _getMetadata();
           _changeSiteState(NewsPageState(tabs: tabs, news: news, meta: meta));
         }
@@ -225,18 +246,18 @@ class NzApi extends StatelessWidget {
         if (_hasInternet) {
           _changeSiteState(
             SecurityPageState(
-              login: await _controller!.runJavascriptReturningResult(
+              login: await controller!.runJavascriptReturningResult(
                 'document.getElementById(\'accountform-username\').value',
               ),
               email: EmailStatus(
-                email: await _controller!.runJavascriptReturningResult(
+                email: await controller!.runJavascriptReturningResult(
                   'document.getElementById(\'accountform-email\').value',
                 ),
-                confirmed: await _controller!.runJavascriptReturningResult(
+                confirmed: await controller!.runJavascriptReturningResult(
                         'var t = document.getElementsByClassName(\'hint-block\')[0].innerText; t == \'Підтверджено\' || t == \'Подтверждён\';') ==
                     'true',
               ),
-              phone: await _controller!.runJavascriptReturningResult(
+              phone: await controller!.runJavascriptReturningResult(
                 'document.getElementById(\'accountform-phonenumber\').value',
               ),
               meta: await _getMetadata(),
@@ -321,7 +342,7 @@ class NzApi extends StatelessWidget {
   Future<String> _executeScript(String script) async {
     var str = await DefaultAssetBundle.of(_context)
         .loadString('Assets/scripts/$script');
-    var i = (await _controller!.runJavascriptReturningResult(str));
+    var i = (await controller!.runJavascriptReturningResult(str));
     return i.toString();
   }
 
@@ -370,7 +391,7 @@ class NzApi extends StatelessWidget {
   }
 
   void forgotPassword() {
-    _controller!.loadUrl('$baseUrl/account/forgot-password');
+    controller!.loadUrl('$baseUrl/account/forgot-password');
   }
 
   Future<ApiUserGetResponse?> _getAdditionalUserInfo(int id) async {
@@ -389,24 +410,24 @@ class NzApi extends StatelessWidget {
   }
 
   void toggleCheckBox(ElementIdentifier identifier, bool value) async {
-    await _controller!.runJavascript(
+    await controller!.runJavascript(
       "${_getObjectCall(identifier)}.value = $value",
     );
   }
 
   Future<void> goto(String path) async {
-    await _controller!.loadUrl(NzApi.baseUrl + path);
+    await controller!.loadUrl(NzApi.baseUrl + path);
   }
 
   Future<void> setValue(ElementIdentifier identifier, String value,
       {String valueName = "value", bool valueIsString = true}) async {
     var c = valueIsString ? "\"" : '';
     var js = "${_getObjectCall(identifier)}.$valueName = $c$value$c";
-    await _controller!.runJavascript(js);
+    await controller!.runJavascript(js);
   }
 
   Future<void> clickButton(ElementIdentifier identifier) async {
-    await _controller!.runJavascript("${_getObjectCall(identifier)}.click()");
+    await controller!.runJavascript("${_getObjectCall(identifier)}.click()");
   }
 
   String _getObjectCall(ElementIdentifier identifier) {
