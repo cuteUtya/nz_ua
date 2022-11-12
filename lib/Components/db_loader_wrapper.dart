@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
+import 'package:nz_ua/Components/database.dart';
 
 class DatabaseLoaderWrapper<T> extends StatelessWidget {
   const DatabaseLoaderWrapper({
@@ -9,29 +9,17 @@ class DatabaseLoaderWrapper<T> extends StatelessWidget {
     required this.id,
   }) : super(key: key);
 
-  final Callback onBuild;
+  final OnBuild onBuild;
   final JsonParseCallback parseCallback;
-  final int id;
+  final String id;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        builder: (context, snapshot) {
-          var t;
-
-          if (snapshot.hasData && snapshot.data != null) {
-            try {
-              t = parseCallback(snapshot.data as Map<String, dynamic>);
-            } catch (e) {
-              //
-            }
-          }
-
-          return onBuild(t);
-        },
-        future: ISQLObject.getById<T>(id));
+    var v = Database.get(id);
+    if (v == null) return onBuild(null);
+    return onBuild(parseCallback(v));
   }
 }
 
-typedef Callback = Widget Function(Object?);
+typedef OnBuild = Widget Function(Object?);
 typedef JsonParseCallback = Object Function(Map<String, dynamic>);

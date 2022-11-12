@@ -1,6 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
-
 part 'types.g.dart';
 
 abstract class ElementIdentifier {
@@ -175,14 +173,11 @@ class SecurityPageState implements NzState {
 }
 
 @JsonSerializable()
-class EmailStatus extends ISQLObject {
+class EmailStatus {
   EmailStatus({
     required this.email,
     required this.confirmed,
-  }) : super(schema: {
-          'email': String,
-          'confirmed': bool,
-        });
+  });
   final String? email;
   final bool? confirmed;
 
@@ -192,12 +187,12 @@ class EmailStatus extends ISQLObject {
 }
 
 @JsonSerializable()
-class ScheduleDay extends ISQLObject {
+class ScheduleDay {
   ScheduleDay({
     required this.today,
     required this.date,
     required this.lessons,
-  }) : super(schema: {'today': bool, 'date': String, 'lessons': List});
+  });
   final bool? today;
   final String? date;
   final List<ScheduleLesson?>? lessons;
@@ -208,16 +203,12 @@ class ScheduleDay extends ISQLObject {
 }
 
 @JsonSerializable()
-class ScheduleLesson extends ISQLObject {
+class ScheduleLesson {
   ScheduleLesson({
     required this.name,
     required this.teacher,
     required this.classAudience,
-  }) : super(schema: {
-          'name': String,
-          'teacher': UserProfileLink,
-          'classAudience': String,
-        });
+  });
   final String? name;
   final UserProfileLink? teacher;
   final String? classAudience;
@@ -272,16 +263,12 @@ class DiaryTableLessonLine {
 }
 
 @JsonSerializable()
-class Mark extends ISQLObject {
+class Mark {
   Mark({
     required this.value,
     required this.lesson,
     this.theme,
-  }) : super(schema: {
-          'value': int,
-          'theme': String,
-          'lesson': String,
-        });
+  });
   final int? value;
   /**theme? тематична/контрольна/поточна/... */
   final String? theme;
@@ -292,12 +279,10 @@ class Mark extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryContentTopDownDbObject extends ISQLObject {
+class DiaryContentTopDownDbObject {
   DiaryContentTopDownDbObject({
     required this.content,
-  }) : super(schema: {
-          'content': List,
-        });
+  });
 
   List<DiaryContentTopToDown>? content;
 
@@ -307,11 +292,11 @@ class DiaryContentTopDownDbObject extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryContentTopToDown extends ISQLObject {
+class DiaryContentTopToDown {
   DiaryContentTopToDown({
     required this.content,
     required this.interval,
-  }) : super(schema: {'interval': DateTimeInterval, 'content': List});
+  });
   final DateTimeInterval? interval;
   final List<DiaryDayTopToDown?>? content;
 
@@ -321,13 +306,10 @@ class DiaryContentTopToDown extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryDayTopToDown extends ISQLObject {
+class DiaryDayTopToDown {
   DiaryDayTopToDown({
     required this.dayDate,
     required this.lines,
-  }) : super(schema: {
-    'dayDate': String,
-    'lines': List,
   });
   final String? dayDate;
   final List<DiaryLine>? lines;
@@ -338,15 +320,11 @@ class DiaryDayTopToDown extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryLine extends ISQLObject {
+class DiaryLine {
   DiaryLine({
     required this.num,
     required this.lessonTime,
     this.content,
-  }) : super(schema: {
-    'num': int,
-    'lessonTime': DateTimeInterval,
-    'content': List
   });
   final int? num;
 
@@ -361,7 +339,7 @@ class DiaryLine extends ISQLObject {
 }
 
 @JsonSerializable()
-class DiaryLineContent extends ISQLObject {
+class DiaryLineContent {
   DiaryLineContent({
     required this.name,
     required this.topic,
@@ -369,13 +347,6 @@ class DiaryLineContent extends ISQLObject {
     required this.homework,
     required this.workType,
     this.mark,
-  }) : super(schema: {
-    'name': String,
-    'topic': String,
-    'classAudience': String,
-    'homework': List,
-    'mark': String,
-    'workType': String,
   });
   final String? name;
   final String? topic;
@@ -391,18 +362,13 @@ class DiaryLineContent extends ISQLObject {
 }
 
 @JsonSerializable()
-class SideMetadata extends ISQLObject {
+class SideMetadata {
   SideMetadata({
     required this.comingHomework,
     required this.latestMarks,
     required this.closestBirthdays,
     required this.me,
-  }) : super(schema: {
-          'comingHomework': List,
-          'latestMarks': List,
-          'closestBirthdays': List,
-          'me': UserProfileLink,
-        });
+  });
   final List<Homework>? comingHomework;
   final List<Mark>? latestMarks;
   final List<Birthday>? closestBirthdays;
@@ -532,16 +498,11 @@ class Semester {
 }
 
 @JsonSerializable()
-class Birthday extends ISQLObject {
+class Birthday {
   Birthday({
     required this.date,
     required this.user,
-  }) : super(
-          schema: {
-            'user': UserProfileLink,
-            'date': String,
-          },
-        );
+  });
   final UserProfileLink? user;
   final String? date;
 
@@ -551,11 +512,11 @@ class Birthday extends ISQLObject {
 }
 
 @JsonSerializable()
-class Homework extends ISQLObject {
+class Homework {
   Homework({
     required this.exercises,
     required this.date,
-  }) : super(schema: {'date': String, 'exercises': List});
+  });
   final String? date;
   final List<Exercise>? exercises;
 
@@ -565,14 +526,11 @@ class Homework extends ISQLObject {
 }
 
 @JsonSerializable()
-class Exercise extends ISQLObject {
+class Exercise {
   Exercise({
     required this.exercise,
     required this.lesson,
-  }) : super(schema: {
-          'lesson': String,
-          'exercise': String,
-        });
+  });
   final String? lesson;
   final String? exercise;
 
@@ -612,16 +570,11 @@ class UserProfile {
 }
 
 @JsonSerializable()
-class UserProfileLink extends ISQLObject {
+class UserProfileLink {
   UserProfileLink({
     required this.fullName,
     required this.profileUrl,
-  }) : super(
-          schema: {
-            'fullName': String,
-            'profileUrl': String,
-          },
-        );
+  });
   final String? fullName;
   final String? profileUrl;
 
@@ -631,10 +584,10 @@ class UserProfileLink extends ISQLObject {
 }
 
 @JsonSerializable()
-class DateTimeInterval extends ISQLObject {
-  DateTimeInterval({required this.fromTime, required this.toTime, }) : super(schema: {
-    'fromTime': String,
-    'toTime': String,
+class DateTimeInterval {
+  DateTimeInterval({
+    required this.fromTime,
+    required this.toTime,
   });
   final String? fromTime;
   final String? toTime;

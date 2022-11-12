@@ -3,16 +3,18 @@ import 'package:design_system_provider/desing_components.dart';
 import 'package:design_system_provider/desing_provider.dart';
 import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:nz_ua/Components/database.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
+import 'package:nz_ua/nzsiteapi/types.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({Key? key, required this.api}) : super(key: key);
   final NzApi api;
   @override
-  State<StatefulWidget> createState() => NewsPageState();
+  State<StatefulWidget> createState() => _NewsPageState();
 }
 
-class NewsPageState extends State<NewsPage> {
+class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
@@ -22,21 +24,38 @@ class NewsPageState extends State<NewsPage> {
         var news = data.data;
 
         if (news == null) {
+          var tabsJSON = Database.get('newsTabs');
+          var tabs = tabsJSON != null ? TabSet.fromJson(tabsJSON) : null;
+          //lol bruh rewrite state managment
+          var newsJSON = Database.get('news#${tabs?.tabs?[1].name}');
+          var n = newsJSON != null ? NewsArr.fromJson(newsJSON) : null;
+          if (tabs != null && n != null) {
+            news = NewsPageState(
+              tabs: tabs,
+              news: n,
+              meta: null,
+            );
+          }
           widget.api.forceUpdateNews();
-          return Container();
+          if (news == null) return Container();
         }
 
         var currentIndex = 0;
 
         for (var i = 0; i < news!.tabs!.tabs!.length; i++) {
-          if (news!.tabs!.tabs![i].active!) currentIndex = i;
+          if (news!.tabs?.tabs?[i].active ?? false) currentIndex = i;
         }
+
+        Database.save(news!.tabs!, 'newsTabs');
+        Database.save(
+            news!.news!, 'news#${news!.tabs!.tabs![currentIndex].name}');
 
         return Column(
           children: [
             Padding(
               padding: design.layout.spacing400.bottom,
               child: ActionGroup(
+                key: UniqueKey(),
                 enableSelection: true,
                 size: ButtonSize.small,
                 items: [
@@ -60,13 +79,18 @@ class NewsPageState extends State<NewsPage> {
             for (var news in news.news!.news!)
               Column(
                 children: [
-                  if(news.author == null)
-                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [ Text.rich(
-                    design.typography.text(
-                      news.newsTime ?? '',
-                      size: design.typography.fontSize75.value,
+                  if (news.author == null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text.rich(
+                          design.typography.text(
+                            news.newsTime ?? '',
+                            size: design.typography.fontSize75.value,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),],),
                   Container(
                     decoration: BoxDecoration(
                       color: design.colors.gray.shade200,

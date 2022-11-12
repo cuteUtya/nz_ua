@@ -8,8 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/MarkDisplay.dart';
 import 'package:nz_ua/Components/Components/TextWithIcon.dart';
+import 'package:nz_ua/Components/database.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
-import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
 import 'package:rxdart/rxdart.dart';
@@ -40,12 +40,22 @@ class DiaryPageLineViewState extends State<DiaryPageLineView> {
     var current = tryFindMatchContent(widget.currentFromDate);
 
     if (current?.content == null) {
+      var dbVal = Database.get('DiaryPageLineView${widget.currentFromDate}');
+      if (dbVal != null) {
+        current = DiaryContentTopToDown.fromJson(dbVal);
+        content.add(current);
+      }
+
       widget.api.forceUpdateDiary(fromDate: widget.currentFromDate);
-      //TODO load screen
-      return Container();
+      if (dbVal == null) {
+        //TODO load screen
+        return Container();
+      }
     }
 
-    if(current!.interval != null) widget.intervalStream.add(current!.interval!);
+    if (current!.interval != null) {
+      widget.intervalStream.add(current!.interval!);
+    }
 
     List<Widget> items = [];
 
@@ -179,7 +189,6 @@ class DiaryPageLineViewState extends State<DiaryPageLineView> {
 
   @override
   void initState() {
-    loadValuesFromDB();
     listenNewValues();
     super.initState();
   }
@@ -188,42 +197,22 @@ class DiaryPageLineViewState extends State<DiaryPageLineView> {
     streamSubscription = widget.api.diaryContentTopDown.listen(
       (event) {
         receiveNewValues = true;
+        Database.save(event, 'DiaryPageLineView${event.interval?.fromTime}');
         setState(() => content.add(event));
       },
     );
   }
 
-  void loadValuesFromDB() async {
-    // drop table
-    // DiaryContentTopDownDbObject(content: []).deleteAllValues();
-    var c = await ISQLObject.getById<DiaryContentTopDownDbObject>(1);
-    print(c);
-    //  try {
-    if (c != null) {
-      var d = DiaryContentTopDownDbObject.fromJson(c).content;
-      if (d != null) setState(() => content = d);
-    }
-    /*  } catch (e) {
-      //TODO fix null's while parsing
-    }*/
+  @override
+  void dispose() {
+    streamSubscription?.cancel();
+    super.dispose();
   }
 
   bool isToday(String? s) {
     if (s == null) return false;
     bool r = s.contains('сьогодні') || s.contains('сегодня');
     return r;
-  }
-
-  @override
-  void dispose() {
-    if (content.isNotEmpty && receiveNewValues) {
-      var db = DiaryContentTopDownDbObject(content: content);
-      ISQLObject.dropTableByName(ISQLObject.getNameOfChildDB(
-          ISQLObject.getNameOfDB(type: DiaryContentTopToDown)));
-      db.save(id: 1);
-    }
-    streamSubscription?.cancel();
-    super.dispose();
   }
 
   DiaryContentTopToDown? tryFindMatchContent(String dateString) {
@@ -235,7 +224,8 @@ class DiaryPageLineViewState extends State<DiaryPageLineView> {
       if ((element.interval?.fromTime ?? '') != '' &&
           (element.interval?.toTime ?? '') != '') {
         if (DateTime.parse(element.interval!.fromTime!).isBefore(date) &&
-            DateTime.parse(element.interval!.toTime!).isAfter(date)) {
+                DateTime.parse(element.interval!.toTime!).isAfter(date) ||
+            element.interval?.fromTime == dateString) {
           r = element;
         }
       }

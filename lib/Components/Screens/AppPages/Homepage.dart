@@ -3,6 +3,7 @@ import 'package:design_system_provider/desing_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:nz_ua/Components/Components/InformationTable.dart';
 import 'package:nz_ua/Components/Components/MarkDisplay.dart';
+import 'package:nz_ua/Components/database.dart';
 import 'package:nz_ua/Components/db_loader_wrapper.dart';
 import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
@@ -70,14 +71,12 @@ class HomepageState extends State<Homepage> {
 
     return DatabaseLoaderWrapper<SideMetadata>(
       parseCallback: SideMetadata.fromJson,
-      id: 1,
+      id: 'metadataSingle',
       onBuild: (value) => StreamBuilder(
         stream: widget.api.sideMetadata,
         initialData: null,
         builder: (_, data) {
           SideMetadata? metadata = data.data ?? (value as SideMetadata?);
-
-          print(metadata);
 
           if (data.data == null) {
             widget.api.forceUpdateMetadata();
@@ -87,10 +86,8 @@ class HomepageState extends State<Homepage> {
             return Container();
           }
 
-          //save new value to db
-          if (data.data != null) {
-            metadata.save(id: 1);
-          }
+          Database.save(metadata, 'metadataSingle');
+
           var padding = Padding(
             padding: design.layout.spacing300.top,
             child: Container(),
@@ -119,10 +116,14 @@ class HomepageState extends State<Homepage> {
                                             design.typography.fontSize100.value,
                                         semantic: TextSemantic.heading),
                                   ),
-                                  Text.rich(
-                                    design.typography.text(
-                                      homework.exercise ?? '',
-                                      size: design.typography.fontSize100.value,
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width * 0.7,
+                                    child: Text.rich(
+                                      design.typography.text(
+                                        homework.exercise ?? '',
+                                        size:
+                                            design.typography.fontSize100.value,
+                                      ),
                                     ),
                                   ),
                                 ],

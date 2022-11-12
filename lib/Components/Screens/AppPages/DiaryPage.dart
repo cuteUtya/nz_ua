@@ -14,7 +14,6 @@ import 'package:nz_ua/Components/Components/TextWithIcon.dart';
 import 'package:nz_ua/Components/Screens/AppPages/DiaryPage/DiaryPageGridView.dart';
 import 'package:nz_ua/Components/Screens/AppPages/DiaryPage/DiaryPageLineView.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
-import 'package:nz_ua/nzsiteapi/ISQLObject.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
 import 'package:rxdart/rxdart.dart';
@@ -34,18 +33,19 @@ class DiaryPage extends StatefulWidget {
 }
 
 class _DiaryPageState extends State<DiaryPage> {
-  late DateTime currentFromDate = DateTime.now();
+  late DateTime currentFromDate = mostRecentMonday(DateTime.now());
   BehaviorSubject<DateTimeInterval> intervalSubject =
       BehaviorSubject<DateTimeInterval>();
 
   bool isGridView = false;
 
+  DateTime mostRecentMonday(DateTime date) =>
+      DateTime(date.year, date.month, (date.day - date.weekday % 7) + 1);
+
+
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
-
-    print(currentFromDate);
-
     return Column(
       children: <Widget>[
         Row(
