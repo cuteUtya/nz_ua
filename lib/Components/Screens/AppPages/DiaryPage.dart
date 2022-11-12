@@ -42,7 +42,6 @@ class _DiaryPageState extends State<DiaryPage> {
   DateTime mostRecentMonday(DateTime date) =>
       DateTime(date.year, date.month, (date.day - date.weekday % 7) + 1);
 
-
   @override
   Widget build(BuildContext context) {
     var design = Desing.of(context);
@@ -63,21 +62,20 @@ class _DiaryPageState extends State<DiaryPage> {
                   ),
                 ),
                 StreamBuilder(
-                  stream: intervalSubject.stream,
-                  builder: (_, d) {
-                    if(d.data != null) {
-                      currentFromDate = DateTime.parse(d.data!.fromTime!);
-                    }
-                    return Text.rich(
-                      design.typography.text(
-                        '${d.data?.fromTime} — ${d.data?.toTime}',
-                        size: design.typography.fontSize200.value,
-                        semantic: TextSemantic.detail,
-                      ),
-                      textAlign: TextAlign.center,
-                    );
-                  }
-                ),
+                    stream: intervalSubject.stream,
+                    builder: (_, d) {
+                      if (d.data != null) {
+                        currentFromDate = DateTime.parse(d.data!.fromTime!);
+                      }
+                      return Text.rich(
+                        design.typography.text(
+                          '${d.data?.fromTime} — ${d.data?.toTime}',
+                          size: design.typography.fontSize200.value,
+                          semantic: TextSemantic.detail,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    }),
                 GestureDetector(
                   onTap: () => next(),
                   child: Icon(
@@ -97,7 +95,11 @@ class _DiaryPageState extends State<DiaryPage> {
                 )
               ],
               onChange: (d) => setState(
-                  () => isGridView = d[0].icon == SpectrumIcons.smock_viewgrid),
+                () {
+                  isGridView = d[0].icon == SpectrumIcons.smock_viewgrid;
+                  currentFromDate = mostRecentMonday(DateTime.now());
+                },
+              ),
               enableSelection: true,
               allowEmptySelection: false,
               selectionMode: SelectionMode.single,
@@ -130,7 +132,7 @@ class _DiaryPageState extends State<DiaryPage> {
   String formatDate(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
   void next() {
-    if(isGridView) {
+    if (isGridView) {
       widget.api.nextDiaryPage();
     } else {
       setState(() => currentFromDate = currentFromDate.add(week));
@@ -138,9 +140,11 @@ class _DiaryPageState extends State<DiaryPage> {
   }
 
   void previus() {
-    if(isGridView) {
+    if (isGridView) {
       widget.api.previusDiaryPage();
     } else {
-    setState(() => currentFromDate = currentFromDate.subtract(isGridView ? halfOfMouth : week));
-  }}
+      setState(() => currentFromDate =
+          currentFromDate.subtract(isGridView ? halfOfMouth : week));
+    }
+  }
 }
