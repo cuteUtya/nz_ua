@@ -259,6 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
           series: <ChartSeries<_ChartData, num>>[
             BarSeries<_ChartData, num>(
               dataSource: d,
+              borderRadius: const BorderRadius.horizontal(right: Radius.circular(4)),
               xValueMapper: (_ChartData data, _) => data.x,
               yValueMapper: (_ChartData data, _) => data.y,
               color: design.colors.green.shade700,
@@ -337,6 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
          return SfCartesianChart(
            primaryXAxis: CategoryAxis(
              majorGridLines: MajorGridLines(width: 0),
+             labelPlacement: LabelPlacement.onTicks,
            ),
            primaryYAxis: NumericAxis(
              minimum: 0,
@@ -346,7 +348,9 @@ class _ProfilePageState extends State<ProfilePage> {
            ),
            series: <ChartSeries<_ChartData, String>>[
              BarSeries<_ChartData, String>(
+               width: 0.3,
                dataSource: d,
+               borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
                xValueMapper: (_ChartData data, _) => this.data!.subjects![data.x.toInt()].subjectName ?? '' ,
                yValueMapper: (_ChartData data, _) => data.y,
                color: design.colors.green.shade700,
