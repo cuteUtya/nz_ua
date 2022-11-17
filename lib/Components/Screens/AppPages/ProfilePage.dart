@@ -30,8 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
     appLocalization.vi_piska,
     appLocalization.marks_for_period_by_values,
     appLocalization.average_mark_for_period_by_lessons,
-    appLocalization.marks_for_period_trend,
-    appLocalization.marks_for_period_trend_single,
   ];
 
   var fromDate = DateTime.now().subtract(const Duration(days: 31));
@@ -268,10 +266,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         );
       } else if (current == appLocalization.vi_piska) {
-        /* var d = data!.subjects!.map((e) {
-          var l = e.marks!.map((e) => int.parse(e)).reduce((a, b) => a + b);
-          return _ChartData(data!.subjects!.indexOf(e).toDouble(), l / e.marks!.length);
-        });*/
         return InformationTable(
           columnsSize: const [0.1, 0.5],
           content: [
@@ -334,6 +328,32 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
           ],
         );
+      } else if(current == appLocalization.average_mark_for_period_by_lessons) {
+         var d = data!.subjects!.map((e) {
+          var l = e.marks!.map((e) => int.parse(e)).reduce((a, b) => a + b);
+          return _ChartData(data!.subjects!.indexOf(e).toDouble(), l / e.marks!.length);
+        }).toList();
+
+         return SfCartesianChart(
+           primaryXAxis: CategoryAxis(
+             majorGridLines: MajorGridLines(width: 0),
+           ),
+           primaryYAxis: NumericAxis(
+             minimum: 0,
+             maximum: 12,
+             interval: 1,
+             majorGridLines: MajorGridLines(width: 0),
+           ),
+           series: <ChartSeries<_ChartData, String>>[
+             BarSeries<_ChartData, String>(
+               dataSource: d,
+               xValueMapper: (_ChartData data, _) => this.data!.subjects![data.x.toInt()].subjectName ?? '' ,
+               yValueMapper: (_ChartData data, _) => data.y,
+               color: design.colors.green.shade700,
+             ),
+           ],
+         );
+         print(d);
       }
     }
     return Container();
