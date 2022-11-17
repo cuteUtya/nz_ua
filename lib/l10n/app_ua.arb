@@ -17,5 +17,14 @@
     "tomorrow_homework": "Завтрішня домашня робота",
     "latest_mark": "Оставнні оцінки",
     "coming_birthdays": "Найближчі дні народження",
-    "no_homework_tomorrow": "На завтра немає домашньої роботи"
+    "no_homework_tomorrow": "На завтра немає домашньої роботи",
+    "performance_analysis": "Аналіз успішності",
+    "vi_piska": "Виписка оцінок",
+    "marks_for_period_by_values": "Оцінки за період, за значенням",
+    "average_mark_for_period_by_lessons": "Середня оцінка періоду, за урок",
+    "marks_for_period_trend": "Оцінки за період",
+    "marks_for_period_trend_single": "Оцінка за період, за кожен урок",
+    "time_to": "по",
+    "lesson_name": "Назва предмету",
+    "obtained_results": "Результати"
 }

@@ -430,6 +430,78 @@ class News {
   Map<String, dynamic> toJson() => _$NewsToJson(this);
 }
 
+class StudentPerfomanceResponce {
+  Missed? missed;
+  List<Subjects>? subjects;
+  String? errorMessage;
+
+  StudentPerfomanceResponce({this.missed, this.subjects, this.errorMessage});
+
+  StudentPerfomanceResponce.fromJson(Map<String, dynamic> json) {
+    missed = json['missed'] != null ? Missed.fromJson(json['missed']) : null;
+    if (json['subjects'] != null) {
+      subjects = <Subjects>[];
+      json['subjects'].forEach((v) {
+        subjects!.add(Subjects.fromJson(v));
+      });
+    }
+    errorMessage = json['error_message'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (missed != null) {
+      data['missed'] = missed!.toJson();
+    }
+    if (subjects != null) {
+      data['subjects'] = subjects!.map((v) => v.toJson()).toList();
+    }
+    data['error_message'] = errorMessage;
+    return data;
+  }
+}
+
+class Missed {
+  int? days;
+  int? lessons;
+
+  Missed({this.days, this.lessons});
+
+  Missed.fromJson(Map<String, dynamic> json) {
+    days = json['days'];
+    lessons = json['lessons'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['days'] = days;
+    data['lessons'] = lessons;
+    return data;
+  }
+}
+
+class Subjects {
+  String? subjectId;
+  String? subjectName;
+  List<String>? marks;
+
+  Subjects({this.subjectId, this.subjectName, this.marks});
+
+  Subjects.fromJson(Map<String, dynamic> json) {
+    subjectId = json['subject_id'];
+    subjectName = json['subject_name'];
+    marks = json['marks'].cast<String>();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['subject_id'] = subjectId;
+    data['subject_name'] = subjectName;
+    data['marks'] = marks;
+    return data;
+  }
+}
+
 @JsonSerializable()
 class NewsContent {
   NewsContent({

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:prefs/prefs.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
@@ -38,6 +39,9 @@ class NzApi extends StatelessWidget {
 
   final BehaviorSubject<NewsPageState> _newsState = BehaviorSubject();
   Stream<NewsPageState> get newsStream => _newsState.stream;
+
+  final BehaviorSubject<ProfilePageState> _profilePageState = BehaviorSubject();
+  Stream<ProfilePageState> get profilePages => _profilePageState.stream;
 
   late BuildContext _context;
 
@@ -126,6 +130,16 @@ class NzApi extends StatelessWidget {
     }
   }
 
+  void openProfile({String? id}) async {
+    if (id == null) {
+      var url = await controller!.runJavascriptReturningResult(
+          'document.getElementsByClassName(\'profile-menu\')[0].children[0].href');
+      await controller!.loadUrl(url.replaceAll('\"', ''));
+    } else {
+      controller!.loadUrl('$baseUrl/id$id');
+    }
+  }
+
   void forceUpdateNews({String? url}) {
     controller!.loadUrl(url ?? '$baseUrl/dashboard/news');
   }
@@ -173,6 +187,10 @@ class NzApi extends StatelessWidget {
 
       case NewsPageState:
         _newsState.add((state as NewsPageState));
+        break;
+
+      case ProfilePageState:
+        _profilePageState.add(state as ProfilePageState);
         break;
     }
 
@@ -339,6 +357,23 @@ class NzApi extends StatelessWidget {
     }
   }
 
+  String formatDate(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
+
+  Future<StudentPerfomanceResponce?> getPerfomance({
+    required DateTime fromDate,
+    required DateTime toDate,
+  }) async {
+    var json = await _makeAPIRequest('/v1/schedule/student-performance', """{
+      "start_date": "${formatDate(fromDate)}", 	
+      "end_date": "${formatDate(toDate)}",
+      "student_id": ${Prefs.getInt('studentID')}
+    }""", bearer: Prefs.getString('apiToken'));
+
+    if(json != null) return StudentPerfomanceResponce.fromJson(json!);
+
+    return null;
+  }
+
   Future<String> _executeScript(String script) async {
     var str = await DefaultAssetBundle.of(_context)
         .loadString('Assets/scripts/$script');
@@ -358,31 +393,44 @@ class NzApi extends StatelessWidget {
     _executeScript('diaryCurrent.js');
   }
 
+  Future<dynamic> _makeAPIRequest(String path, String body, {String? bearer}) async {
+    var dio = Dio();
+    dio.options.contentType = "application/json";
+
+    if(bearer != null) dio.options.headers['Authorization'] = 'Bearer $bearer';
+
+    try {
+      var s = await dio.post(
+        'http://api-mobile.nz.ua$path',
+        data: body,
+      );
+      return s.data;
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<bool> login(String name, String password) async {
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
     await clickButton(ClassName('ms-button form-submit-btn'));
 
-    bool success = true;
-
-    var dio = Dio();
-    dio.options.contentType = "application/json";
     await Prefs.setString('username', name);
     await Prefs.setString('password', password);
-    try {
-      var s = await dio.post('http://api-mobile.nz.ua/v1/user/login', data: """{
+
+    var json = await _makeAPIRequest('/v1/user/login', """{
         "username": "$name",
         "password": "$password"
       }""");
-      var response = ApiLoginResponse.fromJson(s.data);
-      token = response.access_token;
-      await Prefs.setString('apiToken', token);
-    } catch (e) {
-      print(e);
-      success = false;
-    }
 
-    return success;
+    if(json == null) return false;
+
+    var response = ApiLoginResponse.fromJson(json);
+    token = response.access_token;
+    await Prefs.setString('apiToken', token);
+    await Prefs.setInt('studentID', response.student_id);
+
+    return true;
   }
 
   Future sendRecoverCode(String email) async {

@@ -19,6 +19,7 @@ dependencies:
   json_annotation: ^4.7.0
   dio: ^4.0.6
   prefs: ^3.0.0
+  syncfusion_flutter_charts: ^20.3.57
   flutter_dash:
     git: https://github.com/huy-lv/flutter_dash
   connectivity_plus: ^3.0.2

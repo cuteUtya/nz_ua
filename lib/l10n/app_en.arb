@@ -16,5 +16,14 @@
     "tomorrow_homework": "Tomorrow's homework",
     "latest_mark": "Latest mark",
     "coming_birthdays": "Coming birthdays",
-    "no_homework_tomorrow": "No homework for tomorrow"
+    "no_homework_tomorrow": "No homework for tomorrow",
+    "performance_analysis": "Performance analysis",
+    "vi_piska": "Statement of grades",
+    "marks_for_period_by_values": "Marks for period, by values",
+    "average_mark_for_period_by_lessons": "Average marks for period, by lessons",
+    "marks_for_period_trend": "Marks for period, trend",
+    "marks_for_period_trend_single": "Marks for period by lesson, trend",
+    "time_to": "to",
+    "lesson_name": "lesson name",
+    "obtained_results": "results"
 }

@@ -8,6 +8,7 @@ import 'package:nz_ua/Components/Components/MarkDisplay.dart';
 import 'package:nz_ua/Components/Screens/AppPages/DiaryPage.dart';
 import 'package:nz_ua/Components/Screens/AppPages/Homepage.dart';
 import 'package:nz_ua/Components/Screens/AppPages/NewsPage.dart';
+import 'package:nz_ua/Components/Screens/AppPages/ProfilePage.dart';
 import 'package:nz_ua/Components/db_loader_wrapper.dart';
 import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/Icons/spectrum_icons_icons.dart';
@@ -82,6 +83,10 @@ class _AppMainState extends State<AppMain> {
       );
     } else if (state == NEWS) {
       page = NewsPage(
+        api: widget.api,
+      );
+    } else if (state == PROFILE) {
+      page = ProfilePage(
         api: widget.api,
       );
     }
