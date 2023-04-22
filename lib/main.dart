@@ -7,7 +7,6 @@ import 'package:nz_ua/Components/Screens/ForgotPasswordScreen.dart';
 import 'package:nz_ua/Components/Screens/SignIn.dart';
 import 'package:nz_ua/Components/localization.dart';
 import 'package:nz_ua/nzsiteapi/nz_api.dart';
-import 'package:nz_ua/nzsiteapi/nz_db.dart';
 import 'package:nz_ua/nzsiteapi/types.dart';
 import 'package:prefs/prefs.dart';
 import 'package:design_system_provider/desing_provider.dart';
@@ -27,10 +26,7 @@ void main() async {
       home: Material(
         child: Desing(
           desingSystem: Spectrum(theme: SpectrumTheme.dark),
-          child: FutureBuilder(
-            builder: (_, __) => const MyApp(),
-            future: NzDB().load(),
-          ),
+          child: const MyApp(),
         ),
       ),
       theme: ThemeData(
