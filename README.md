@@ -2,6 +2,8 @@
 
 App, that almost fully copy main functionality of official site.
 ## ⚠️ Download preview version if don't have account ⚠️
+1. Download and install app-preview.apk
+2. Enter $ sign in username field, leave password field empty and press login to preview
 
 ## Screenshots: 
 <p float="left">
