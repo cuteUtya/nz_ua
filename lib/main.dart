@@ -93,7 +93,6 @@ class MyAppState extends State {
                       api: nzapi,
                     ),
                   );
-                  break;
               }
               return Container();
             },

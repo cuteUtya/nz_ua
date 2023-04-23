@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nz_ua/nzsiteapi/preview_data.dart';
 import 'package:prefs/prefs.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
@@ -47,8 +48,9 @@ class NzApi extends StatelessWidget {
 
   bool _inited = false;
   bool _loaded = false;
-
   bool _hasInternet = false;
+
+  bool preview_mod() => Prefs.getString('preview', 'false') == 'true';
 
   @override
   build(BuildContext context) {
@@ -57,6 +59,10 @@ class NzApi extends StatelessWidget {
       future: (Connectivity().checkConnectivity()),
       builder: (_, d) {
         if (d.hasData) {
+          if(preview_mod()){
+            _changeSiteState(profilePageState_preview);
+            return Container();
+          }
           _hasInternet = d.data != ConnectivityResult.none;
           Connectivity().onConnectivityChanged.listen((event) {
             bool n = event != ConnectivityResult.none;
@@ -131,6 +137,7 @@ class NzApi extends StatelessWidget {
   }
 
   void openProfile({String? id}) async {
+    if(preview_mod()) return;
     if (id == null) {
       var url = await controller!.runJavascriptReturningResult(
           'document.getElementsByClassName(\'profile-menu\')[0].children[0].href');
@@ -141,10 +148,16 @@ class NzApi extends StatelessWidget {
   }
 
   void forceUpdateNews({String? url}) {
+    _newsState.add(myNews_preview);
+    if(preview_mod()) return;
     controller!.loadUrl(url ?? '$baseUrl/dashboard/news');
   }
 
   void forceUpdateGridDiary({String? fromDate}) async {
+    if(preview_mod()) {
+      _diaryContentGrid.add(diaryMarkGrid_preview);
+      return;
+    }
     await forceUpdateDiary();
     var link = await controller!.runJavascriptReturningResult(
         'document.getElementsByClassName(\'table-view-link\')[0].href');
@@ -154,6 +167,10 @@ class NzApi extends StatelessWidget {
   }
 
   Future forceUpdateDiary({String? fromDate}) async {
+    if(preview_mod()) {
+      _diaryContentTopDown.add(diaryContentTopToDown_preview);
+      return;
+    }
     try {
       var url = await _executeScript('getScheduleLink.js');
       if (fromDate != null) {
@@ -166,10 +183,12 @@ class NzApi extends StatelessWidget {
   }
 
   void forceUpdateMetadata() {
+    if(preview_mod()) return;
     controller!.loadUrl('$baseUrl/dashboard/news');
   }
 
   void _changeSiteState(NzState state) {
+    print(state.runtimeType);
     _siteState.add(state);
     _changeLoginState(state);
     currSiteState = state;
@@ -215,6 +234,7 @@ class NzApi extends StatelessWidget {
   }
 
   void _onUrlChange(String url) async {
+    if(preview_mod()) return;
     var path = url.substring(baseUrl.length, url.length);
     print(path);
     switch (path) {
@@ -363,6 +383,11 @@ class NzApi extends StatelessWidget {
     required DateTime fromDate,
     required DateTime toDate,
   }) async {
+    if(preview_mod()) {
+      return studentPerfomanceResponce_preview;
+    }
+
+
     var json = await _makeAPIRequest('/v1/schedule/student-performance', """{
       "start_date": "${formatDate(fromDate)}", 	
       "end_date": "${formatDate(toDate)}",
@@ -413,6 +438,13 @@ class NzApi extends StatelessWidget {
   Future<bool> login(String name, String password) async {
     await setValue(Id('loginform-login'), name);
     await setValue(Id('loginform-password'), password);
+    if(name == "\$") {
+      Prefs.setString('preview', 'true');
+      _changeSiteState(profilePageState_preview);
+      await Prefs.setString('apiToken', 'lol bruh');
+      await Prefs.setInt('studentID', 420);
+      return true;
+    }
     await clickButton(ClassName('ms-button form-submit-btn'));
 
     await Prefs.setString('username', name);
